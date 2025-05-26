@@ -53,9 +53,7 @@ public class AuthsService {
       }
       this.redisTemplate.opsForValue().set(pendingUserId, strNewPendingUser, 15, TimeUnit.MINUTES);
       this.emailService.sendSimpleEmail(email, "Account Verification", otpCOde);
-      return new ResponseDto(200,
-          "Please verify your email with the code sent to %s".format(email),
-          strNewPendingUser);
+      return new ResponseDto(200, "Verification code sent to " + email, null);
     } catch (Exception e) {
       System.out.println(e);
       return new ResponseDto(400, "Registration failed", null);
