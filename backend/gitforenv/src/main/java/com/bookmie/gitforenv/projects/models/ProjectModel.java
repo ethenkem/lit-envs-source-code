@@ -54,9 +54,9 @@ public class ProjectModel {
     return id;
   }
 
-  // public UserModel getMembers() {
-  // return members;
-  // }
+  public List<String> getMembers() {
+    return members;
+  }
 
   public String getDotEnvData() {
     return dotEnvData;
