@@ -1,5 +1,5 @@
 package com.bookmie.gitforenv.projects.dtos;
 
-public record CreateProjectDto(String projectName, String describtion) {
+public record CreateProjectDto(String projectName, String description) {
 
 }

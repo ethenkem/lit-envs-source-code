@@ -15,8 +15,11 @@ public class ProjectService {
   private ProjectRepo projectRepo;
 
   public ResponseDto createProject(CreateProjectDto data) {
-    //if (this.projectRepo.findby)
-    ProjectModel project = new ProjectModel(data.projectName(), data.describtion(), "");
+    // if (this.projectRepo.findby)
+    if (this.projectRepo.findByProjectName(data.projectName()).isPresent()) {
+      return new ResponseDto(409, "Project with similar name already exists", null);
+    }
+    ProjectModel project = new ProjectModel(data.projectName(), data.description(), "hsh");
     this.projectRepo.save(project);
     return new ResponseDto(201, "Project Added", null);
   }

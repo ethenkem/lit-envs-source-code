@@ -2,10 +2,8 @@ package com.bookmie.gitforenv.auths;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.tomcat.util.security.PrivilegedGetTccl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
