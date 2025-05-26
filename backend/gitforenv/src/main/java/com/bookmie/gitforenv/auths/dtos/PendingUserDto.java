@@ -2,8 +2,10 @@ package com.bookmie.gitforenv.auths.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class PendingUserDto {
   private String email;
   private String password;
@@ -13,5 +15,17 @@ public class PendingUserDto {
     this.email = email;
     this.password = password;
     this.otp = otp;
+  }
+
+  public String getOtp() {
+    return otp;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public String getPassword() {
+    return password;
   }
 }

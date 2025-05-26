@@ -34,6 +34,11 @@ public class UserModel {
   @Nullable
   private Instant lastLogedIn;
 
+  public UserModel(String email, String password) {
+    this.email = email;
+    this.password = password;
+  }
+
   // public String getId() {
   // return id;
   // }
