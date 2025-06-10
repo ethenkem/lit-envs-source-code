@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bookmie.gitforenv.auths.dtos.AuthResponseDto;
+import com.bookmie.gitforenv.auths.dtos.GetTokenDto;
 import com.bookmie.gitforenv.auths.dtos.RegisterDto;
 import com.bookmie.gitforenv.auths.dtos.VerifyUserDto;
 import com.bookmie.gitforenv.utils.dtos.ResponseDto;
@@ -27,6 +29,12 @@ public class AuthsController {
   @PostMapping("/verify-user")
   public ResponseEntity<ResponseDto> verifyUser(VerifyUserDto requestData) {
     ResponseDto response = this.authsService.verifyUser(requestData);
+    return ResponseEntity.status(response.statusCode()).body(response);
+  }
+
+  @PostMapping("/obtain-token")
+  public ResponseEntity<AuthResponseDto> obtainToken(GetTokenDto requestData) {
+    AuthResponseDto response = this.authsService.getToken(requestData.email(), requestData.password());
     return ResponseEntity.status(response.statusCode()).body(response);
   }
 }

@@ -2,17 +2,22 @@ package com.bookmie.gitforenv.auths;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import com.bookmie.gitforenv.auths.dtos.AuthResponseDto;
 import com.bookmie.gitforenv.auths.dtos.PendingUserDto;
 import com.bookmie.gitforenv.auths.dtos.RegisterDto;
 import com.bookmie.gitforenv.auths.dtos.VerifyUserDto;
 import com.bookmie.gitforenv.auths.models.UserModel;
 import com.bookmie.gitforenv.auths.repos.UserRepository;
+import com.bookmie.gitforenv.configs.security.JwtService;
 import com.bookmie.gitforenv.configs.services.EmailService;
 import com.bookmie.gitforenv.utils.dtos.ResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +40,9 @@ public class AuthsService {
 
   @Autowired
   private EmailService emailService;
+
+  @Autowired
+  private JwtService jwtService;
 
   public ResponseDto registerUser(RegisterDto data) {
     String email = data.email();
@@ -80,5 +88,24 @@ public class AuthsService {
       return new ResponseDto(500, "Invalid code or code", null);
     }
     return new ResponseDto(400, "Invalid code or code", null);
+  }
+
+  public AuthResponseDto getToken(String email, String password) {
+    UserModel user = this.userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    if (this.passwordEncoder.matches(password, user.getPassword())) {
+      String token = this.jwtService.generateToken(user.getId(), user.getEmail());
+      Map<String, String> userObj = new HashMap<>();
+      userObj.put("token", token);
+      userObj.put("email", user.getEmail());
+      userObj.put("lastLogedIn", user.getLastLogedIn() != null ? user.getLastLogedIn().toString() : null);
+      userObj.put("joinedOn", user.getJoinedOn() != null ? user.getJoinedOn().toString() : null);
+      return new AuthResponseDto(200, "login successful", userObj);
+    }
+    return new AuthResponseDto(401, "login failed", null);
+  }
+
+  public Optional<UserModel> loadUserByUserId(String userId) {
+    return this.userRepository.findById(userId);
   }
 }

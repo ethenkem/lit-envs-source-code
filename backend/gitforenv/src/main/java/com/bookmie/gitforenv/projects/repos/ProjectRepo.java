@@ -12,5 +12,7 @@ import com.bookmie.gitforenv.projects.models.ProjectModel;
 public interface ProjectRepo extends MongoRepository<ProjectModel, String> {
   List<ProjectModel> findByOwner(String userId);
 
+  Optional<ProjectModel> findByIdAndOwner(String id, String owner);
+
   Optional<ProjectModel> findByProjectName(String projectName);
 }

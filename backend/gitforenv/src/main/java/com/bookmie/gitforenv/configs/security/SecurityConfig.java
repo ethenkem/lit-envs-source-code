@@ -1,15 +1,23 @@
 package com.bookmie.gitforenv.configs.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 public class SecurityConfig {
+
+  @Bean
+  public JwtAuthFilter jwtAuthFilter() {
+    return new JwtAuthFilter();
+  }
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -22,12 +30,11 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .cors(cors -> cors.disable())
         .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/auths/**")
+            .permitAll()
             .anyRequest()
-            .permitAll());
-    // .requestMatchers("auths/*")
-    // .permitAll()
-    // .anyRequest()
-    // .authenticated());
+            .authenticated())
+        .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 }
