@@ -120,3 +120,8 @@ cython_debug/
 # dotenv environment variables
 .env
 .env.*
+
+
+# extra
+.data.toml
+env
