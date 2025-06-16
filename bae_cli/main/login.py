@@ -6,7 +6,7 @@ import time
 import requests
 
 
-with open("./let/config.yaml", "r") as f:
+with open("./main/config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 API_URL = f"{config["server"]["api_url"]}/auths/obtain-token"

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bookmie.gitforenv.ops.OpsService;
 import com.bookmie.gitforenv.projects.dtos.CreateProjectDto;
 import com.bookmie.gitforenv.projects.models.ProjectModel;
 import com.bookmie.gitforenv.projects.repos.ProjectRepo;
@@ -16,6 +17,9 @@ public class ProjectService {
 
   @Autowired
   private ProjectRepo projectRepo;
+
+  @Autowired
+  private OpsService operations;
 
   public ResponseDto createProject(CreateProjectDto data, String userId) {
     if (this.projectRepo.findByProjectName(data.projectName()).isPresent()) {
@@ -39,11 +43,18 @@ public class ProjectService {
     return new ResponseDto(200, "successfull", projects);
   }
 
+  public ResponseDto pullEnvContent(String projectId) {
+    Optional<ProjectModel> project = this.projectRepo.findById(projectId);
+    String decryptedEnv = this.operations.decryptEnvData(project.get().getDotEnvData());
+    return new ResponseDto(200, "successfull", decryptedEnv);
+  }
+
   public ResponseDto updateEnvData(String projectId, String envData, String userId) {
     Optional<ProjectModel> project = this.projectRepo.findByIdAndOwner(projectId, userId);
     if (project.isPresent()) {
       ProjectModel projectObj = project.get();
-      projectObj.setDotEnvData(envData);
+      String securedData = this.operations.encryptEnvData(envData);
+      projectObj.setDotEnvData(securedData);
       this.projectRepo.save(projectObj);
       return new ResponseDto(200, "successfull", null);
     }

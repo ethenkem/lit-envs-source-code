@@ -7,7 +7,7 @@ import click
 
 DATA_PATH = Path(".data.toml")
 ENV_PATH = Path(".env")
-CONFIG_PATH = Path("./let/config.yaml")
+CONFIG_PATH = Path("./main/config.yaml")
 
 
 def load_token():

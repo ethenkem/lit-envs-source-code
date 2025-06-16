@@ -5,7 +5,7 @@ import toml
 from pathlib import Path
 from halo import Halo
 
-CONFIG_PATH = Path("./let/config.yaml")
+CONFIG_PATH = Path("./main/config.yaml")
 TOKEN_PATH = Path(".data.toml")
 
 

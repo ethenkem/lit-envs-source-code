@@ -22,6 +22,7 @@ import com.bookmie.gitforenv.projects.dtos.UpdateEnvDataDto;
 import com.bookmie.gitforenv.projects.models.ProjectModel;
 import com.bookmie.gitforenv.utils.dtos.ResponseDto;
 
+
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
@@ -34,6 +35,12 @@ public class ProjectController {
 
   @GetMapping("/")
   public ResponseEntity<ResponseDto> getProjects(Authentication auth) {
+    ResponseDto res = this.projectService.getProjects(this.currentUser.getId());
+    return ResponseEntity.status(res.statusCode()).body(res);
+  }
+
+  @GetMapping("/active-projects")
+  public ResponseEntity<ResponseDto> getUsersActiveProjects(Authentication auth) {
     ResponseDto res = this.projectService.getProjects(this.currentUser.getId());
     return ResponseEntity.status(res.statusCode()).body(res);
   }
@@ -56,5 +63,11 @@ public class ProjectController {
     ResponseDto response = this.projectService.updateEnvData(projectId, requestData.envData(),
         this.currentUser.getId());
     return ResponseEntity.status(response.statusCode()).body(response);
+  }
+
+  @GetMapping("/pull-env-data/{projectId}")
+  public ResponseEntity<ResponseDto> pullEnvData(@PathVariable String projectId) {
+    ResponseDto res = this.projectService.pullEnvContent(projectId);
+    return ResponseEntity.status(res.statusCode()).body(res);
   }
 }

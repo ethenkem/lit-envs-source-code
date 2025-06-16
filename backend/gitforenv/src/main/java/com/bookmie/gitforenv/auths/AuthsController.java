@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,7 +34,7 @@ public class AuthsController {
   }
 
   @PostMapping("/obtain-token")
-  public ResponseEntity<AuthResponseDto> obtainToken(GetTokenDto requestData) {
+  public ResponseEntity<AuthResponseDto> obtainToken(@RequestBody GetTokenDto requestData) {
     AuthResponseDto response = this.authsService.getToken(requestData.email(), requestData.password());
     return ResponseEntity.status(response.statusCode()).body(response);
   }

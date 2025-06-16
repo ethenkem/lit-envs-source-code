@@ -1,0 +1,10 @@
+[project]
+name = "lit"
+version = "0.1.0"
+description = "A CLI tool called lit"
+dependencies = [
+    "click"
+]
+
+[project.scripts]
+bae = "let.cli:main_cli"

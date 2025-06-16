@@ -1,8 +1,5 @@
 import click
-from . import push
-from . import login
-from . import choose_project
-from . import pull
+from . import push, login, choose_project, pull, init
 
 
 @click.version_option("0.1.0")
@@ -11,6 +8,7 @@ def main_cli():
     pass
 
 
+main_cli.add_command(init.init, name="init")
 main_cli.add_command(push.push, name="push")
 main_cli.add_command(login.login, name="login")
 main_cli.add_command(choose_project.select_project, name="choose-project")

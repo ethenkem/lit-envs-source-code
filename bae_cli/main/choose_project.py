@@ -5,7 +5,7 @@ import toml
 from pathlib import Path
 from halo import Halo
 
-CONFIG_PATH = Path("./let/config.yaml")
+CONFIG_PATH = Path("./main/config.yaml")
 DATA_PATH = Path(".data.toml")
 
 
@@ -38,7 +38,6 @@ def load_token():
             return data.get("auths", {}).get("token")
     return None
 
-
 def save_data_to_config(data):
     with open(DATA_PATH, "w") as f:
         toml.dump(data, f)
@@ -64,7 +63,6 @@ def select_project():
             headers={"Authorization": f"Bearer {token}"},
             timeout=30,
         )
-        print(response.json())
         spinner.stop()
 
         if response.status_code != 200:
