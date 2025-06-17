@@ -6,7 +6,7 @@ from pathlib import Path
 from halo import Halo
 
 CONFIG_PATH = Path("./main/config.yaml")
-DATA_PATH = Path(".data.toml")
+DATA_PATH = Path(".lit_env_data.toml")
 
 
 def load_config():
@@ -37,6 +37,7 @@ def load_token():
             data = toml.load(f)
             return data.get("auths", {}).get("token")
     return None
+
 
 def save_data_to_config(data):
     with open(DATA_PATH, "w") as f:

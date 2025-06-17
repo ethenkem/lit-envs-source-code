@@ -43,7 +43,7 @@ def login():
             if token:
                 save_auth(email, token)
                 spinner.succeed(f"✅ Login successful as {email}!")
-                click.secho("🔑 Token saved locally to .let_config", fg="green")
+                click.secho("🔑 Token saved locally", fg="green")
             else:
                 spinner.fail("❌ Login failed: No token received.")
     except Exception as e:

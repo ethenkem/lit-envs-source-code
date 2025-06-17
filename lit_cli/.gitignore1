@@ -1,0 +1,12 @@
+
+wow
+
+# Added by init
+.env
+.env.local
+
+# Added by Lit Env(Dont remove these files)
+.lit_env_data.toml
+
+# Added by Lit Env(Don't remove these files)
+.lit_env_data.toml

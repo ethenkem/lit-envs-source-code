@@ -24,7 +24,7 @@ public class ProjectModel {
   @Indexed(unique = true)
   private String projectName;
 
-  private String describtion;
+  private String description;
 
   @Field(name = "dot_env_data")
   @Nullable
@@ -43,9 +43,9 @@ public class ProjectModel {
   @Field(name = "member_ids")
   private List<String> members = new ArrayList<String>();
 
-  public ProjectModel(String projectName, String describtion, String owner) {
+  public ProjectModel(String projectName, String description, String owner) {
     this.projectName = projectName;
-    this.describtion = describtion;
+    this.description = description;
     this.owner = owner;
   }
 
@@ -63,6 +63,18 @@ public class ProjectModel {
 
   public String getProjectName() {
     return projectName;
+  }
+
+  public Instant getLastUpdated() {
+    return lastUpdated;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public Instant getCreatedOn() {
+    return createdOn;
   }
 
   public void setDotEnvData(String dotEnvData) {

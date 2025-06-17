@@ -53,7 +53,7 @@ public class AuthsService {
     String hashedOtp = this.passwordEncoder.encode(otpCOde);
     PendingUserDto newPendingUser = new PendingUserDto(email, password, hashedOtp);
     if (this.userRepository.findByEmail(email).isPresent()) {
-      return new ResponseDto(200, "Email already exists", null);
+      return new ResponseDto(400, "Email already exists", null);
     }
     try {
       String strNewPendingUser = objectMapper.writeValueAsString(newPendingUser);

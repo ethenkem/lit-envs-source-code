@@ -3,4 +3,4 @@ server:
   timeout: 40
 
 ops:
-  data_file: ".data.toml"
+  data_file: ".lit_env_data.toml"

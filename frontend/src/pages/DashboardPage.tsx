@@ -1,85 +1,66 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Plus, 
-  Folder, 
-  Users, 
-  Shield, 
-  Clock, 
+import {
+  Plus,
+  Folder,
+  Users,
+  Shield,
+  Clock,
   Terminal,
   Search,
   Filter
 } from 'lucide-react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import CreateProjectModal from '../components/CreateProjectModal';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Project {
-  id: string;
-  name: string;
-  description: string;
-  envCount: number;
-  members: number;
-  lastUpdated: string;
-  isEncrypted: boolean;
-  cliActivity: string;
+  id?: string;
+  projectName: string;
+  dotEnvData?: string;
+  members?: any[];
+  lastUpdated?: string;
+  createdOn?: string;
+  description?: string;
+  cliActivity?: string;
+
 }
 
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    name: 'E-commerce API',
-    description: 'Environment variables for the main e-commerce platform',
-    envCount: 24,
-    members: 5,
-    lastUpdated: '2 hours ago',
-    isEncrypted: true,
-    cliActivity: 'Synced 1 hour ago'
-  },
-  {
-    id: '2',
-    name: 'Mobile App Backend',
-    description: 'Backend services configuration for iOS and Android apps',
-    envCount: 18,
-    members: 3,
-    lastUpdated: '1 day ago',
-    isEncrypted: true,
-    cliActivity: 'Synced 3 hours ago'
-  },
-  {
-    id: '3',
-    name: 'Analytics Dashboard',
-    description: 'Data processing and visualization service configs',
-    envCount: 12,
-    members: 2,
-    lastUpdated: '3 days ago',
-    isEncrypted: true,
-    cliActivity: 'Synced 2 days ago'
-  }
-];
 
 const DashboardPage: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
+  const [projects, setProjects] = useState<Project[] | []>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const { user } = useAuth()
 
   const filteredProjects = projects.filter(project =>
-    project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.description.toLowerCase().includes(searchTerm.toLowerCase())
+    project.projectName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleCreateProject = (name: string, description: string) => {
+  const handleCreateProject = (projectName: string) => {
     const newProject: Project = {
-      id: Date.now().toString(),
-      name,
-      description,
-      envCount: 0,
-      members: 1,
-      lastUpdated: 'Just now',
-      isEncrypted: true,
-      cliActivity: 'Never'
+      projectName,
     };
     setProjects([newProject, ...projects]);
   };
+
+  const fetchProjects = async () => {
+    try {
+      console.log(user?.token);
+
+      const res = await axios.get("http://localhost:8080/projects/", { headers: { Authorization: `Bearer ${user?.token}` } })
+      console.log(res.data);
+      
+      setProjects(res.data.data)
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  useEffect(() => {
+    fetchProjects()
+  }, [])
+
 
   return (
     <DashboardLayout>
@@ -148,6 +129,7 @@ const DashboardPage: React.FC = () => {
             {filteredProjects.map((project) => (
               <Link
                 key={project.id}
+                state={{ project: project }}
                 to={`/project/${project.id}`}
                 className="group block bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-200"
               >
@@ -155,27 +137,27 @@ const DashboardPage: React.FC = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <Folder className="h-8 w-8 text-blue-600" />
-                      {project.isEncrypted && (
+                      {project.dotEnvData && (
                         <Shield className="h-4 w-4 text-green-500 ml-2" />
                       )}
                     </div>
                     <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                       <Clock className="h-4 w-4 mr-1" />
-                      {project.lastUpdated}
+                      {project.lastUpdated ? project.lastUpdated : "No last update"}
                     </div>
                   </div>
 
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                    {project.name}
+                    {project.projectName}
                   </h3>
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
-                    {project.description}
+                    {project.description ? project.description : "No project description"}
                   </p>
 
                   <div className="mt-4 flex items-center justify-between text-sm">
                     <div className="flex items-center space-x-4">
                       <span className="text-gray-500 dark:text-gray-400">
-                        {project.envCount} variables
+                        {project.members?.length} members
                       </span>
                       <div className="flex items-center text-gray-500 dark:text-gray-400">
                         <Users className="h-4 w-4 mr-1" />
@@ -186,7 +168,7 @@ const DashboardPage: React.FC = () => {
 
                   <div className="mt-3 flex items-center text-xs text-gray-500 dark:text-gray-400">
                     <Terminal className="h-3 w-3 mr-1" />
-                    CLI: {project.cliActivity}
+                    CLI: {project.cliActivity ? project.cliActivity : "No Cli activity"}
                   </div>
                 </div>
               </Link>
