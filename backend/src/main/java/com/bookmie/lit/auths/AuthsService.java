@@ -70,6 +70,7 @@ public class AuthsService {
   }
 
   public ResponseDto verifyUser(VerifyUserDto data) {
+    System.out.println(data.token());
     String pendingUserId = "pending_user_" + data.email();
     Object pendingUser = this.redisTemplate.opsForValue().getAndDelete(pendingUserId);
     if (pendingUser == null) {
@@ -86,6 +87,7 @@ public class AuthsService {
       }
     } catch (Exception e) {
       System.out.println(e);
+      System.out.println(e.getStackTrace());
       return new ResponseDto(500, "Invalid code or code", null);
     }
     return new ResponseDto(400, "Invalid code or code", null);

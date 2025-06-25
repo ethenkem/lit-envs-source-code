@@ -27,7 +27,7 @@ public class AuthsController {
   }
 
   @PostMapping("/verify-user")
-  public ResponseEntity<ResponseDto> verifyUser(VerifyUserDto requestData) {
+  public ResponseEntity<ResponseDto> verifyUser(@RequestBody VerifyUserDto requestData) {
     ResponseDto response = this.authsService.verifyUser(requestData);
     return ResponseEntity.status(response.statusCode()).body(response);
   }
