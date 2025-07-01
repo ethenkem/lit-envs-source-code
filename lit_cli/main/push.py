@@ -6,7 +6,7 @@ from pathlib import Path
 from halo import Halo
 
 CONFIG_PATH = Path("./main/config.yaml")
-TOKEN_PATH = Path(".data.toml")
+TOKEN_PATH = Path(".lit_env_data.toml")
 
 
 def load_config():

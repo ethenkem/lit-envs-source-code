@@ -44,7 +44,7 @@ const SignUpPage: React.FC = () => {
           }
         }
       )
-      navigate("/verify-user")
+      navigate("/verify-user", { state: { pendingUserEmail: email } })
       console.log(res.data);
 
     } catch (err: any) {

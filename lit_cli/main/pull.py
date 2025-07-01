@@ -5,7 +5,7 @@ from pathlib import Path
 from halo import Halo
 import click
 
-DATA_PATH = Path(".data.toml")
+DATA_PATH = Path(".lit_env_data.toml")
 ENV_PATH = Path(".env")
 CONFIG_PATH = Path("./main/config.yaml")
 

@@ -220,7 +220,7 @@ const ProjectPage: React.FC = () => {
               <textarea
                 readOnly
                 wrap="soft"
-                className="w-full h-64 p-4 border text-white bg-gray-700 border-gray-700 rounded resize-none overflow-auto font-mono"
+                className="w-full h-64 p-4 border text-gray-200 outline-none bg-gray-900 border-gray-700 rounded resize-none overflow-auto font-mono"
               >
                 {project.dotEnvData}
               </textarea>
@@ -268,6 +268,7 @@ const ProjectPage: React.FC = () => {
       </div>
 
       <AddVariableModal
+        projectId={project.id}
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddVariable}

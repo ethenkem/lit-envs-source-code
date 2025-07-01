@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.bookmie.lit.auths.dtos.AuthResponseDto;
 import com.bookmie.lit.auths.dtos.PendingUserDto;
 import com.bookmie.lit.auths.dtos.RegisterDto;
+import com.bookmie.lit.utils.*;
 import com.bookmie.lit.auths.dtos.VerifyUserDto;
 import com.bookmie.lit.configs.security.JwtService;
 import com.bookmie.lit.configs.services.EmailService;
@@ -61,7 +62,10 @@ public class AuthsService {
         this.redisTemplate.opsForValue().getAndDelete(pendingUserId);
       }
       this.redisTemplate.opsForValue().set(pendingUserId, strNewPendingUser, 15, TimeUnit.MINUTES);
-      this.emailService.sendSimpleEmail(email, "Account Verification", otpCOde);
+
+      String html = EmailTemplateLoader.loadTemplate("verification_email.html");
+      String msg = html.replace("123456", otpCOde);
+      this.emailService.sendHtmlEmail(email, "Lit Envs Verification", msg);
       return new ResponseDto(200, "Verification code sent to " + email, null);
     } catch (Exception e) {
       System.out.println(e);

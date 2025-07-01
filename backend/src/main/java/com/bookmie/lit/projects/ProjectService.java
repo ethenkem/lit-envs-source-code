@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bookmie.lit.ops.OpsService;
+import com.bookmie.lit.projects.dtos.AddCollaboratorDto;
 import com.bookmie.lit.projects.dtos.CreateProjectDto;
 import com.bookmie.lit.utils.dtos.ResponseDto;
 
@@ -37,7 +38,7 @@ public class ProjectService {
   }
 
   public ResponseDto getProjects(String userId) {
-    List<ProjectModel> projects = this.projectRepo.findByOwner(userId);
+    List<ProjectModel> projects = this.projectRepo.findByCollaboratorsContaining(userId);
     return new ResponseDto(200, "successfull", projects);
   }
 
@@ -57,5 +58,16 @@ public class ProjectService {
       return new ResponseDto(200, "successfull", null);
     }
     return new ResponseDto(404, "not found", null);
+  }
+
+  public ResponseDto addCollaborator(AddCollaboratorDto data) {
+    Optional<ProjectModel> project = this.projectRepo.findById(data.projectId());
+    if (project.isEmpty()) {
+      return new ResponseDto(404, "project not found", null);
+    }
+    ProjectModel projectObj = project.get();
+    projectObj.addCollaborator(data.userId());
+    this.projectRepo.save(projectObj);
+    return new ResponseDto(200, "user added", null);
   }
 }

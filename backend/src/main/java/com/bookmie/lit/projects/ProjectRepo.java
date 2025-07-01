@@ -13,4 +13,6 @@ public interface ProjectRepo extends MongoRepository<ProjectModel, String> {
   Optional<ProjectModel> findByIdAndOwner(String id, String owner);
 
   Optional<ProjectModel> findByProjectName(String projectName);
+
+  List<ProjectModel> findByCollaboratorsContaining(String userId);
 }

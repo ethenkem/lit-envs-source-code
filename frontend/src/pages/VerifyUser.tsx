@@ -1,12 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Shield } from 'lucide-react';
+import axios from 'axios';
+import { BACKEND_URL } from '../configs/constants';
 
 const VerifyUser: React.FC = () => {
   const [otp, setOtp] = useState(Array(6).fill(''));
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const location = useLocation()
 
   const navigate = useNavigate();
 
@@ -44,11 +47,14 @@ const VerifyUser: React.FC = () => {
     setError('');
 
     try {
-      // simulate API call
-      await new Promise((res) => setTimeout(res, 1500));
-
-      // Navigate on success
-      navigate('/dashboard');
+      console.log(otp);
+      const res = await axios.post(`${BACKEND_URL}/auths/verify-user`, {
+        email: location.state.pendingUserEmail,
+        token: code
+      }, {
+      })
+      console.log(res.data);
+      navigate('/login');
     } catch (err) {
       setError('Invalid verification code.');
     } finally {
