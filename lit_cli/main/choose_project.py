@@ -5,15 +5,16 @@ import toml
 from pathlib import Path
 from halo import Halo
 
-CONFIG_PATH = Path("./main/config.yaml")
-DATA_PATH = Path(".data.toml")
+# CONFIG_PATH = Path("./main/config.yaml")
+DATA_PATH = Path(".lit_env_data.toml")
 
 
-def load_config():
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH, "r") as f:
-            return yaml.safe_load(f)
-    return {}
+# def load_config():
+#     if CONFIG_PATH.exists():
+#         with open(CONFIG_PATH, "r") as f:
+#             return yaml.safe_load(f)
+#     return {}
+#
 
 
 def save_active_project(project_name, id):
@@ -38,6 +39,7 @@ def load_token():
             return data.get("auths", {}).get("token")
     return None
 
+
 def save_data_to_config(data):
     with open(DATA_PATH, "w") as f:
         toml.dump(data, f)
@@ -46,9 +48,9 @@ def save_data_to_config(data):
 @click.command()
 def select_project():
     """Fetch user projects and select one."""
-    config = load_config()
+    # config = load_config()
     token = load_token()
-    api_url = config.get("server", {}).get("api_url")
+    API_URL = "http://localhost:8080"
 
     if not token:
         click.secho("🔑 Token not found. Please login first.", fg="red")
@@ -59,7 +61,7 @@ def select_project():
 
     try:
         response = requests.get(
-            f"{api_url}/projects/active-projects",
+            f"{API_URL}/projects/active-projects",
             headers={"Authorization": f"Bearer {token}"},
             timeout=30,
         )

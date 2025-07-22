@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,8 +10,8 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  const { login } = useAuth();
+  const { login } = useAuth()
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,7 +20,9 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      await login(email, password);
+      const res = await axios.post("http://localhost:8080/auths/obtain-token", { email, password })
+      console.log(res.data);
+      login(res.data.data)
       navigate('/dashboard');
     } catch (err) {
       setError('Invalid email or password');

@@ -2,17 +2,15 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
 
 const SignUpPage: React.FC = () => {
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  const { signup } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,10 +31,25 @@ const SignUpPage: React.FC = () => {
     }
 
     try {
-      await signup(name, email, password);
-      navigate('/dashboard');
-    } catch (err) {
-      setError('Failed to create account');
+      const res = await axios.post(
+        `http://localhost:8080/auths/register`,
+        {
+          email: email,
+          password: password
+
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          }
+        }
+      )
+      navigate("/verify-user", { state: { pendingUserEmail: email } })
+      console.log(res.data);
+
+    } catch (err: any) {
+      console.log(err);
+      setError(err.response.data.message);
     } finally {
       setIsLoading(false);
     }
@@ -65,23 +78,6 @@ const SignUpPage: React.FC = () => {
           )}
 
           <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Full name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your full name"
-              />
-            </div>
-
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email address

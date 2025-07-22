@@ -6,14 +6,15 @@ from pathlib import Path
 from halo import Halo
 
 CONFIG_PATH = Path("./main/config.yaml")
-TOKEN_PATH = Path(".data.toml")
+TOKEN_PATH = Path(".lit_env_data.toml")
 
 
-def load_config():
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH, "r") as f:
-            return yaml.safe_load(f)
-    return {}
+# def load_config():
+#     if CONFIG_PATH.exists():
+#         with open(CONFIG_PATH, "r") as f:
+#             return yaml.safe_load(f)
+#     return {}
+#
 
 
 def load_data():
@@ -37,15 +38,14 @@ def load_token():
     help="File to push",
 )
 def push(file):
-    config = load_config()
     token = load_token()
-    api_url = config.get("server", {}).get("api_url")
+    API_URL = "http://localhost:8080"
 
     if not token:
         click.secho("🔑 Token not found. Please login first.", fg="red")
         return
 
-    if not api_url:
+    if not API_URL:
         click.secho("🌐 API URL not found in config.yaml.", fg="red")
         return
 
@@ -58,7 +58,7 @@ def push(file):
 
     try:
         response = requests.put(
-            f"{api_url}/projects/update-env-data/{active_project.get('id')}/",
+            f"{API_URL}/projects/update-env-data/{active_project.get('id')}/",
             json={"envData": content},
             headers={"Authorization": f"Bearer {token}"},
             timeout=30,

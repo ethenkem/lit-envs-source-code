@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -15,19 +17,22 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    onSubmit(name, description);
-    setName('');
-    setDescription('');
-    setIsLoading(false);
-    onClose();
+    try {
+      const res = await axios.post("http://localhost:8080/projects/create", { projectName: name, description }, { headers: { Authorization: `Bearer ${user?.token}` } })
+      console.log(res.data);
+      onSubmit(name, description);
+      setName('');
+      setDescription('');
+      setIsLoading(false);
+      onClose();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   if (!isOpen) return null;

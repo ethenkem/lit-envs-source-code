@@ -5,7 +5,7 @@ from pathlib import Path
 from halo import Halo
 import click
 
-DATA_PATH = Path(".data.toml")
+DATA_PATH = Path(".lit_env_data.toml")
 ENV_PATH = Path(".env")
 CONFIG_PATH = Path("./main/config.yaml")
 
@@ -24,21 +24,25 @@ def load_project_id():
     return None
 
 
-def load_api_url():
-    if CONFIG_PATH.exists():
-        with open(CONFIG_PATH, "r") as f:
-            config = yaml.safe_load(f)
-            return config.get("server", {}).get("api_url")
-    return None
+#
+#
+# def load_api_url():
+#     if CONFIG_PATH.exists():
+#         with open(CONFIG_PATH, "r") as f:
+#             config = yaml.safe_load(f)
+#             return config.get("server", {}).get("api_url")
+#     return None
+
+API_URL = "http://localhost:8080"
 
 
 @click.command()
 def pull():
+    # print("jsks")
     token = load_token()
     project_id = load_project_id()
-    api_url = load_api_url()
 
-    if not token or not project_id or not api_url:
+    if not token or not project_id or not API_URL:
         click.secho("❌ Missing token, project ID, or API URL.", fg="red")
         return
 
@@ -47,7 +51,7 @@ def pull():
 
     try:
         response = requests.get(
-            f"{api_url}/projects/pull-env-data/{project_id}",
+            f"{API_URL}/projects/pull-env-data/{project_id}",
             headers={"Authorization": f"Bearer {token}"},
             timeout=30,
         )

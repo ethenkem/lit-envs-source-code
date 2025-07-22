@@ -1,17 +1,14 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Home, 
-  Settings, 
-  LogOut, 
-  Shield, 
-  Moon, 
-  Sun,
+import {
+  Home,
+  Settings,
+  LogOut,
+  Shield,
   User,
   ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -19,7 +16,6 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -40,13 +36,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/dashboard" className="flex items-center space-x-2">
+              <Link to="/" className="flex items-center space-x-2">
                 <Shield className="h-8 w-8 text-blue-600" />
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
-                  SecureEnv
+                  Lit Envs
                 </span>
               </Link>
-              
+
               <div className="hidden md:ml-8 md:flex md:space-x-8">
                 {navigation.map((item) => {
                   const Icon = item.icon;
@@ -55,11 +51,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                        isActive
+                      className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive
                           ? 'text-blue-600 border-b-2 border-blue-600'
                           : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                      }`}
+                        }`}
                     >
                       <Icon className="h-4 w-4 mr-2" />
                       {item.name}
@@ -70,12 +65,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <button
-                onClick={toggleTheme}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-              >
-                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </button>
+
 
               <div className="relative group">
                 <button className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
@@ -87,7 +77,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <span className="hidden md:block">{user?.name}</span>
                   <ChevronDown className="h-4 w-4" />
                 </button>
-                
+
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                     {user?.email}

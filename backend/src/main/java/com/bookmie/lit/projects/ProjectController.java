@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bookmie.lit.configs.components.CurrentUser;
+import com.bookmie.lit.projects.dtos.AddCollaboratorDto;
 import com.bookmie.lit.projects.dtos.CreateProjectDto;
 import com.bookmie.lit.projects.dtos.UpdateEnvDataDto;
 import com.bookmie.lit.utils.dtos.ResponseDto;
@@ -65,6 +66,12 @@ public class ProjectController {
   @GetMapping("/pull-env-data/{projectId}")
   public ResponseEntity<ResponseDto> pullEnvData(@PathVariable String projectId) {
     ResponseDto res = this.projectService.pullEnvContent(projectId);
+    return ResponseEntity.status(res.statusCode()).body(res);
+  }
+
+  @PostMapping("/add-collaborator")
+  public ResponseEntity<ResponseDto> addCollaborator(@RequestBody AddCollaboratorDto data) {
+    ResponseDto res = this.projectService.addCollaborator(data);
     return ResponseEntity.status(res.statusCode()).body(res);
   }
 }

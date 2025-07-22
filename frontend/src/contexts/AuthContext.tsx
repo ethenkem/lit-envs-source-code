@@ -1,16 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+//import { BACKEND_URL } from '../configs/constants';
 
 interface User {
-  id: string;
   email: string;
-  name: string;
-  avatar?: string;
+  joinedOn: string;
+  lastLogedIn: string;
+  token: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  login: (userData: User) => void;
   logout: () => void;
   isLoading: boolean;
 }
@@ -30,7 +30,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -38,43 +37,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockUser = {
-      id: '1',
-      email,
-      name: email.split('@')[0],
-      avatar: `https://ui-avatars.com/api/?name=${email.split('@')[0]}&background=3B82F6&color=fff`
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-  };
-
-  const signup = async (name: string, email: string, password: string) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const mockUser = {
-      id: '1',
-      email,
-      name,
-      avatar: `https://ui-avatars.com/api/?name=${name}&background=3B82F6&color=fff`
-    };
-    
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
-  };
-
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
   };
 
+
+  const login = (userData: User) => {
+    localStorage.setItem("user", JSON.stringify(userData))
+    setUser(userData)
+  }
+
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

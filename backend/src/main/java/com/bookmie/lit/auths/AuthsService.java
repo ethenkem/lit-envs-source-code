@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.bookmie.lit.auths.dtos.AuthResponseDto;
 import com.bookmie.lit.auths.dtos.PendingUserDto;
 import com.bookmie.lit.auths.dtos.RegisterDto;
+import com.bookmie.lit.utils.*;
 import com.bookmie.lit.auths.dtos.VerifyUserDto;
 import com.bookmie.lit.configs.security.JwtService;
 import com.bookmie.lit.configs.services.EmailService;
@@ -53,7 +54,7 @@ public class AuthsService {
     String hashedOtp = this.passwordEncoder.encode(otpCOde);
     PendingUserDto newPendingUser = new PendingUserDto(email, password, hashedOtp);
     if (this.userRepository.findByEmail(email).isPresent()) {
-      return new ResponseDto(200, "Email already exists", null);
+      return new ResponseDto(400, "Email already exists", null);
     }
     try {
       String strNewPendingUser = objectMapper.writeValueAsString(newPendingUser);
@@ -61,7 +62,10 @@ public class AuthsService {
         this.redisTemplate.opsForValue().getAndDelete(pendingUserId);
       }
       this.redisTemplate.opsForValue().set(pendingUserId, strNewPendingUser, 15, TimeUnit.MINUTES);
-      this.emailService.sendSimpleEmail(email, "Account Verification", otpCOde);
+
+      String html = EmailTemplateLoader.loadTemplate("verification_email.html");
+      String msg = html.replace("123456", otpCOde);
+      this.emailService.sendHtmlEmail(email, "Lit Envs Verification", msg);
       return new ResponseDto(200, "Verification code sent to " + email, null);
     } catch (Exception e) {
       System.out.println(e);
@@ -70,6 +74,7 @@ public class AuthsService {
   }
 
   public ResponseDto verifyUser(VerifyUserDto data) {
+    System.out.println(data.token());
     String pendingUserId = "pending_user_" + data.email();
     Object pendingUser = this.redisTemplate.opsForValue().getAndDelete(pendingUserId);
     if (pendingUser == null) {
@@ -86,6 +91,7 @@ public class AuthsService {
       }
     } catch (Exception e) {
       System.out.println(e);
+      System.out.println(e.getStackTrace());
       return new ResponseDto(500, "Invalid code or code", null);
     }
     return new ResponseDto(400, "Invalid code or code", null);

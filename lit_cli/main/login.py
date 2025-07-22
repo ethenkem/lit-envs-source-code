@@ -6,12 +6,14 @@ import time
 import requests
 
 
-with open("./main/config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+# with open("./main/config.yaml", "r") as f:
+#     config = yaml.safe_load(f)
+#
+API_BACKEND = "http://localhost:8080"
 
-API_URL = f"{config["server"]["api_url"]}/auths/obtain-token"
-TIME_OUT = config["server"]["timeout"]
-DATA_OPS_FILE = config["ops"]["data_file"]
+API_URL = f"{API_BACKEND}/auths/obtain-token"
+TIME_OUT = 40
+DATA_OPS_FILE = ".lit_env_data.toml"
 LET_CONFIG_PATH = DATA_OPS_FILE
 
 
@@ -43,8 +45,11 @@ def login():
             if token:
                 save_auth(email, token)
                 spinner.succeed(f"✅ Login successful as {email}!")
-                click.secho("🔑 Token saved locally to .let_config", fg="green")
+                click.secho("🔑 Token saved locally", fg="green")
             else:
                 spinner.fail("❌ Login failed: No token received.")
+        else:
+            spinner.fail("❌ Login failed: Invalid credentials.")
     except Exception as e:
+        print(e)
         raise e

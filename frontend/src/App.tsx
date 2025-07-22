@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
@@ -10,6 +9,8 @@ import DashboardPage from './pages/DashboardPage';
 import ProjectPage from './pages/ProjectPage';
 import SettingsPage from './pages/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import VerifyUser from './pages/VerifyUser';
+import DocsPage from './pages/DocsPage';
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
+            <Route path='/docs' element={<DocsPage />} />
+            <Route path="/verify-user" element={<VerifyUser />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route
               path="/dashboard"

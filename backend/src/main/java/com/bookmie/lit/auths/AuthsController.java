@@ -21,13 +21,13 @@ public class AuthsController {
   private AuthsService authsService;
 
   @PostMapping("/register")
-  public ResponseEntity<ResponseDto> registerUser(RegisterDto requestData) {
+  public ResponseEntity<ResponseDto> registerUser(@RequestBody RegisterDto requestData) {
     ResponseDto response = this.authsService.registerUser(requestData);
     return ResponseEntity.status(response.statusCode()).body(response);
   }
 
   @PostMapping("/verify-user")
-  public ResponseEntity<ResponseDto> verifyUser(VerifyUserDto requestData) {
+  public ResponseEntity<ResponseDto> verifyUser(@RequestBody VerifyUserDto requestData) {
     ResponseDto response = this.authsService.verifyUser(requestData);
     return ResponseEntity.status(response.statusCode()).body(response);
   }

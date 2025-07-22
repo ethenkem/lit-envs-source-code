@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Plus, 
-  Shield, 
-  Eye, 
-  EyeOff, 
-  Edit3, 
-  Trash2, 
-  Users, 
-  Terminal, 
+import React, { useCallback, useState } from 'react';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import {
+  ArrowLeft,
+  Plus,
+  Shield,
+  Eye,
+  EyeOff,
+  Edit3,
+  Trash2,
+  Users,
+  Terminal,
   Copy,
   Check,
   Search,
@@ -35,33 +35,6 @@ interface TeamMember {
   avatar: string;
   role: 'owner' | 'editor' | 'viewer';
 }
-
-const mockVariables: EnvVariable[] = [
-  {
-    id: '1',
-    key: 'DATABASE_URL',
-    value: 'postgresql://user:pass@localhost:5432/mydb',
-    encryptedValue: 'a94f8fe3e8422ef2c7b6d5a9f1b2c3d4e5f6a7b8c9d0e1f2',
-    lastUpdated: '2 hours ago',
-    updatedBy: 'John Doe'
-  },
-  {
-    id: '2',
-    key: 'API_SECRET_KEY',
-    value: 'sk_live_abcd1234efgh5678ijkl9012mnop3456',
-    encryptedValue: 'b5c8f2e9a1d4e7b0c3f6a9d2e5f8b1c4e7a0d3f6b9c2e5f8',
-    lastUpdated: '1 day ago',
-    updatedBy: 'Jane Smith'
-  },
-  {
-    id: '3',
-    key: 'JWT_SECRET',
-    value: 'super-secret-jwt-key-for-token-signing',
-    encryptedValue: 'c6d9f3e0b2e5f8c1d4f7b0e3f6c9d2f5f8c1e4f7b0d3f6c9',
-    lastUpdated: '3 days ago',
-    updatedBy: 'Bob Wilson'
-  }
-];
 
 const mockTeamMembers: TeamMember[] = [
   {
@@ -89,33 +62,15 @@ const mockTeamMembers: TeamMember[] = [
 
 const ProjectPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [variables, setVariables] = useState<EnvVariable[]>(mockVariables);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(mockTeamMembers);
   const [showEncrypted, setShowEncrypted] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const project = {
-    name: 'E-commerce API',
-    description: 'Environment variables for the main e-commerce platform'
-  };
-
-  const filteredVariables = variables.filter(variable =>
-    variable.key.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const location = useLocation()
+  const project = location.state.project
 
   const handleAddVariable = (key: string, value: string) => {
-    const newVariable: EnvVariable = {
-      id: Date.now().toString(),
-      key,
-      value,
-      encryptedValue: 'encrypted_' + Math.random().toString(36).substring(2, 15),
-      lastUpdated: 'Just now',
-      updatedBy: 'You'
-    };
-    setVariables([newVariable, ...variables]);
   };
 
   const handleInviteUser = (email: string, role: 'editor' | 'viewer') => {
@@ -153,7 +108,7 @@ const ProjectPage: React.FC = () => {
             </Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                {project.name}
+                {project.projectName}
                 <Shield className="h-6 w-6 text-green-500 ml-2" />
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -181,24 +136,11 @@ const ProjectPage: React.FC = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <Shield className="h-6 w-6 text-green-500" />
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                      Variables
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                      {variables.length}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
+          <div className="bg-white items-center justify-center flex dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <Shield size={40} className=" text-green-500" />
+            <p className="text-lg ml-2 font-medium text-gray-500 dark:text-gray-400 truncate">
+              Variables Highly Encrypted
+            </p>
           </div>
 
           <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
@@ -213,7 +155,7 @@ const ProjectPage: React.FC = () => {
                       Team Members
                     </dt>
                     <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                      {teamMembers.length}
+                      {project.members.length}
                     </dd>
                   </dl>
                 </div>
@@ -252,11 +194,10 @@ const ProjectPage: React.FC = () => {
               <div className="mt-4 sm:mt-0 flex items-center space-x-3">
                 <button
                   onClick={() => setShowEncrypted(!showEncrypted)}
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                    showEncrypted
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                      : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                  }`}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${showEncrypted
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                    : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                    }`}
                 >
                   {showEncrypted ? (
                     <>
@@ -272,69 +213,18 @@ const ProjectPage: React.FC = () => {
                 </button>
               </div>
             </div>
-
-            <div className="mt-4 flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search variables..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-              <button className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </button>
-            </div>
           </div>
 
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {filteredVariables.map((variable) => (
-              <div key={variable.id} className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="text-sm font-medium text-gray-900 dark:text-white font-mono">
-                        {variable.key}
-                      </h3>
-                      <Shield className="h-4 w-4 text-green-500" />
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 mb-3">
-                      <code className="flex-1 text-sm bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded border">
-                        {showEncrypted ? variable.encryptedValue : variable.value}
-                      </code>
-                      <button
-                        onClick={() => copyToClipboard(showEncrypted ? variable.encryptedValue : variable.value, variable.id)}
-                        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                      >
-                        {copiedId === variable.id ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                      <span>Updated {variable.lastUpdated} by {variable.updatedBy}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2 ml-4">
-                    <button className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                      <Edit3 className="h-4 w-4" />
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <div className='px-7 py-8 overflow-hidden'>
+              <textarea
+                readOnly
+                wrap="soft"
+                className="w-full h-64 p-4 border text-gray-200 outline-none bg-gray-900 border-gray-700 rounded resize-none overflow-auto font-mono"
+              >
+                {project.dotEnvData}
+              </textarea>
+            </div>
           </div>
         </div>
 
@@ -363,13 +253,12 @@ const ProjectPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  member.role === 'owner'
-                    ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
-                    : member.role === 'editor'
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${member.role === 'owner'
+                  ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
+                  : member.role === 'editor'
                     ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
                     : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                }`}>
+                  }`}>
                   {member.role}
                 </span>
               </div>
@@ -379,6 +268,7 @@ const ProjectPage: React.FC = () => {
       </div>
 
       <AddVariableModal
+        projectId={project.id}
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddVariable}

@@ -1,28 +1,41 @@
 import React, { useState } from 'react';
-import { X, Loader2, Eye, EyeOff } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { BACKEND_URL } from '../configs/constants';
+import { useAuth } from '../contexts/AuthContext';
 
 interface AddVariableModalProps {
+  projectId: string,
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (key: string, value: string) => void;
 }
 
 const AddVariableModal: React.FC<AddVariableModalProps> = ({
+  projectId,
   isOpen,
   onClose,
   onSubmit,
 }) => {
   const [key, setKey] = useState('');
   const [value, setValue] = useState('');
-  const [showValue, setShowValue] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [envVars, setEnvVars] = useState("")
+  const { user } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const res = await axios.put(`${BACKEND_URL}/projects/update-env-data/${projectId}/`, {
+      envData: JSON.stringify(envVars)
+    }, {
+      headers: {
+        Authorization: `Bearer ${user?.token}`
+      }
+    })
+
+    console.log(res.data);
 
     onSubmit(key, value);
     setKey('');
@@ -50,47 +63,20 @@ const AddVariableModal: React.FC<AddVariableModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label htmlFor="key" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Variable Name
+            <label htmlFor="envVar" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Environment Variable
             </label>
-            <input
-              id="key"
-              type="text"
+            <textarea
+              id="envVar"
               required
-              value={key}
-              onChange={(e) => setKey(e.target.value.toUpperCase())}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-mono"
-              placeholder="API_KEY"
+              value={envVars}
+              onChange={(e) => setEnvVars(e.target.value)}
+              rows={10}
+              placeholder={`API_KEY=your-api-key-here\nDB_HOST=localhost\nDB_PASSWORD=super-secret\nJWT_SECRET=verysecretjwtkey\nNODE_ENV=production`}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-mono resize-none"
             />
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Use UPPERCASE with underscores (e.g., API_SECRET_KEY)
-            </p>
-          </div>
-
-          <div>
-            <label htmlFor="value" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Value
-            </label>
-            <div className="mt-1 relative">
-              <input
-                id="value"
-                type={showValue ? 'text' : 'password'}
-                required
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-mono"
-                placeholder="your-secret-value"
-              />
-              <button
-                type="button"
-                onClick={() => setShowValue(!showValue)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                {showValue ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
-            </div>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              This value will be encrypted and stored securely
+              Paste a single .env-style variable (e.g., <code>API_KEY=your-secret</code>)
             </p>
           </div>
 
@@ -104,7 +90,7 @@ const AddVariableModal: React.FC<AddVariableModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={isLoading || !key.trim() || !value.trim()}
+              disabled={isLoading || !envVars.trim()}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {isLoading ? (
@@ -113,11 +99,12 @@ const AddVariableModal: React.FC<AddVariableModalProps> = ({
                   Adding...
                 </>
               ) : (
-                'Add Variable'
+                'Add Variables'
               )}
             </button>
           </div>
         </form>
+
       </div>
     </div>
   );

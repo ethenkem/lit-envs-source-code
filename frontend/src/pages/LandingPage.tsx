@@ -1,33 +1,32 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Shield, 
-  Lock, 
-  Users, 
-  Terminal, 
-  Zap, 
-  Globe, 
-  CheckCircle, 
+import {
+  Shield,
+  Lock,
+  Users,
+  Terminal,
+  Zap,
+  Globe,
+  CheckCircle,
   ArrowRight,
   Menu,
   X,
   Star,
   Github,
   Twitter,
-  Moon,
-  Sun,
-  Code,
-  Database,
-  Cloud,
   Eye,
   EyeOff
 } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import landingImg from "../assets/Animation - 1750827748544.json"
+import Lottie from 'lottie-react';
+//import { useTheme } from '../contexts/ThemeContext';
 
 const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showEncrypted, setShowEncrypted] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
+  //const { isDark, toggleTheme } = useTheme();
+  const { user } = useAuth()
 
   const features = [
     {
@@ -141,7 +140,7 @@ const LandingPage: React.FC = () => {
               <Link to="/" className="flex items-center space-x-2">
                 <Shield className="h-8 w-8 text-blue-600" />
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
-                  SecureEnv
+                  Lit Envs
                 </span>
               </Link>
             </div>
@@ -151,30 +150,36 @@ const LandingPage: React.FC = () => {
               <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                 Features
               </a>
-              <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                Pricing
+              <a href="/docs" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                Docs
               </a>
               <a href="#testimonials" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
                 Testimonials
               </a>
-              <button
-                onClick={toggleTheme}
-                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-              >
-                {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </button>
-              <Link
-                to="/login"
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/signup"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Get Started
-              </Link>
+
+              {!user?.email ?
+                <>
+                  <Link
+                    to="/login"
+                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Get Started
+                  </Link>
+                </>
+                :
+                <Link
+                  to="/dashboard"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Dashboard
+                </Link>
+              }
             </div>
 
             {/* Mobile menu button */}
@@ -221,35 +226,41 @@ const LandingPage: React.FC = () => {
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
-            <div className="flex justify-center mb-8">
-              <div className="flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium">
-                <Star className="h-4 w-4" />
-                <span>Trusted by 10,000+ developers</span>
+            <div>
+              <div>
+                <div className="flex justify-center mb-8">
+                  <div className="flex items-center space-x-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium">
+                    <Star className="h-4 w-4" />
+                    <span>Trusted by 10,000+ developers</span>
+                  </div>
+                </div>
+
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+                  Secure and Sync Development Environment
+                  <br />
+                  <span className="text-blue-600">Variables in the Cloud</span>
+                </h1>
+
+                <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+                  Store, manage, and deploy your environment variables with military-grade encryption.
+                  Collaborate securely with your team and integrate seamlessly with your workflow.
+                </p>
+                <div className="mb-16">
+                  <Lottie animationData={landingImg} loop autoplay />
+                </div>
               </div>
             </div>
-            
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              Secure Environment
-              <br />
-              <span className="text-blue-600">Variables in the Cloud</span>
-            </h1>
-            
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Store, manage, and deploy your environment variables with military-grade encryption. 
-              Collaborate securely with your team and integrate seamlessly with your workflow.
-            </p>
-
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link
                 to="/signup"
                 className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Start Free Trial
+                Start For Free
               </Link>
-              <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center">
+              <Link target='_blank' to={"https://github.com/ethenkem/lit-source-codes/tree/main"} className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center">
                 <Github className="h-5 w-5 mr-2" />
                 View on GitHub
-              </button>
+              </Link>
             </div>
 
             {/* Demo Section */}
@@ -260,11 +271,10 @@ const LandingPage: React.FC = () => {
                 </h3>
                 <button
                   onClick={() => setShowEncrypted(!showEncrypted)}
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    showEncrypted
-                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                      : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                  }`}
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${showEncrypted
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+                    : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                    }`}
                 >
                   {showEncrypted ? (
                     <>
@@ -279,7 +289,7 @@ const LandingPage: React.FC = () => {
                   )}
                 </button>
               </div>
-              
+
               <div className="space-y-4 text-left">
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center space-x-3">
@@ -290,7 +300,7 @@ const LandingPage: React.FC = () => {
                     {showEncrypted ? 'a94f8fe3e8422ef2c7b6d5a9f1b2c3d4...' : 'postgresql://user:pass@localhost:5432/mydb'}
                   </code>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <Shield className="h-4 w-4 text-green-500" />
@@ -300,7 +310,7 @@ const LandingPage: React.FC = () => {
                     {showEncrypted ? 'b5c8f2e9a1d4e7b0c3f6a9d2e5f8b1c4...' : 'sk_live_abcd1234efgh5678ijkl9012mnop3456'}
                   </code>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <Shield className="h-4 w-4 text-green-500" />
@@ -324,7 +334,7 @@ const LandingPage: React.FC = () => {
               Everything you need to secure your secrets
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Built by developers, for developers. SecureEnv provides enterprise-grade security 
+              Built by developers, for developers. SecureEnv provides enterprise-grade security
               with the simplicity your team needs.
             </p>
           </div>
@@ -362,10 +372,10 @@ const LandingPage: React.FC = () => {
                 Seamless CLI Integration
               </h2>
               <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                Deploy with confidence using our powerful CLI tool. Sync your environment 
+                Deploy with confidence using our powerful CLI tool. Sync your environment
                 variables across all environments with a single command.
               </p>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <CheckCircle className="h-5 w-5 text-green-500" />
@@ -393,7 +403,7 @@ const LandingPage: React.FC = () => {
                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                 <span className="text-gray-400 text-sm ml-2">Terminal</span>
               </div>
-              
+
               <div className="font-mono text-sm space-y-2">
                 <div className="text-green-400">$ npm install -g @secureenv/cli</div>
                 <div className="text-gray-400">✓ SecureEnv CLI installed successfully</div>
@@ -451,83 +461,6 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-24 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">
-              Choose the plan that's right for your team
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {pricingPlans.map((plan, index) => (
-              <div
-                key={index}
-                className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg border-2 transition-all duration-300 hover:shadow-xl ${
-                  plan.popular
-                    ? 'border-blue-500 transform scale-105'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-                
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {plan.name}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    {plan.description}
-                  </p>
-                  
-                  <div className="mb-8">
-                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      {plan.price}
-                    </span>
-                    {plan.period && (
-                      <span className="text-gray-600 dark:text-gray-400">
-                        {plan.period}
-                      </span>
-                    )}
-                  </div>
-
-                  <ul className="space-y-4 mb-8">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center">
-                        <CheckCircle className="h-5 w-5 text-green-500 mr-3" />
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button
-                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
-                      plan.popular
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {plan.cta}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
@@ -535,21 +468,22 @@ const LandingPage: React.FC = () => {
             Ready to secure your environment variables?
           </h2>
           <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-            Join thousands of developers who trust SecureEnv with their most sensitive data.
+            Join thousands of developers who trust LitEnvs with their most sensitive data.
             Start your free trial today.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/signup"
               className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center"
             >
-              Start Free Trial
+              Start For Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-              Schedule Demo
-            </button>
+            <Link target='_blank' to={"https://github.com/ethenkem/lit-source-codes/tree/main"} className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center justify-center">
+              <Github className="h-5 w-5 mr-2" />
+              Contribute
+            </Link>
           </div>
         </div>
       </section>
@@ -561,10 +495,10 @@ const LandingPage: React.FC = () => {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <Shield className="h-8 w-8 text-blue-400" />
-                <span className="text-xl font-bold">SecureEnv</span>
+                <span className="text-xl font-bold">Lit Envs</span>
               </div>
               <p className="text-gray-400 mb-6 max-w-md">
-                The most secure way to manage environment variables in the cloud. 
+                The most secure way to manage environment variables in the cloud.
                 Built by developers, for developers.
               </p>
               <div className="flex space-x-4">
@@ -581,7 +515,6 @@ const LandingPage: React.FC = () => {
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">CLI Tool</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">API Docs</a></li>
               </ul>
@@ -590,8 +523,7 @@ const LandingPage: React.FC = () => {
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+                <li><a target='_blank' href="https://github.com/ethenkem/lit-source-codes/blob/main/README.md" className="hover:text-white transition-colors">About</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
               </ul>

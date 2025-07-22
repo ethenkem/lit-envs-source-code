@@ -2,7 +2,9 @@ package com.bookmie.lit.projects;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -24,7 +26,7 @@ public class ProjectModel {
   @Indexed(unique = true)
   private String projectName;
 
-  private String describtion;
+  private String description;
 
   @Field(name = "dot_env_data")
   @Nullable
@@ -40,12 +42,12 @@ public class ProjectModel {
   @Field(name = "last_updated")
   private Instant lastUpdated;
 
-  @Field(name = "member_ids")
-  private List<String> members = new ArrayList<String>();
+  @Field(name = "collaborators")
+  private Set<String> collaborators = new HashSet<>();
 
-  public ProjectModel(String projectName, String describtion, String owner) {
+  public ProjectModel(String projectName, String description, String owner) {
     this.projectName = projectName;
-    this.describtion = describtion;
+    this.description = description;
     this.owner = owner;
   }
 
@@ -53,8 +55,12 @@ public class ProjectModel {
     return id;
   }
 
-  public List<String> getMembers() {
-    return members;
+  public Set<String> getCollaborators() {
+    return collaborators;
+  }
+
+  public void addCollaborator(String userId) {
+    this.collaborators.add(userId);
   }
 
   public String getDotEnvData() {
@@ -63,6 +69,18 @@ public class ProjectModel {
 
   public String getProjectName() {
     return projectName;
+  }
+
+  public Instant getLastUpdated() {
+    return lastUpdated;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public Instant getCreatedOn() {
+    return createdOn;
   }
 
   public void setDotEnvData(String dotEnvData) {
