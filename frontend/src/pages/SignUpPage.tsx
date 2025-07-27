@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { BACKEND_URL } from '../configs/constants';
 
 const SignUpPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -32,7 +33,7 @@ const SignUpPage: React.FC = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:8080/auths/register`,
+        `${BACKEND_URL}/auths/register`,
         {
           email: email,
           password: password

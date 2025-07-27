@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { BACKEND_URL } from '../configs/constants';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -20,7 +21,7 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      const res = await axios.post("http://localhost:8080/auths/obtain-token", { email, password })
+      const res = await axios.post(`${BACKEND_URL}auths/obtain-token`, { email, password })
       console.log(res.data);
       login(res.data.data)
       navigate('/dashboard');

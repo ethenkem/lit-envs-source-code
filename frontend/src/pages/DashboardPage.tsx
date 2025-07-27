@@ -14,6 +14,7 @@ import DashboardLayout from '../components/Layout/DashboardLayout';
 import CreateProjectModal from '../components/CreateProjectModal';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { BACKEND_URL } from '../configs/constants';
 
 interface Project {
   id?: string;
@@ -49,7 +50,7 @@ const DashboardPage: React.FC = () => {
     try {
       console.log(user?.token);
 
-      const res = await axios.get("http://localhost:8080/projects/", { headers: { Authorization: `Bearer ${user?.token}` } })
+      const res = await axios.get(`${BACKEND_URL}/projects/`, { headers: { Authorization: `Bearer ${user?.token}` } })
       console.log(res.data);
       
       setProjects(res.data.data)
