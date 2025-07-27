@@ -11,9 +11,6 @@ var rootCmd = &cobra.Command{
 	Use:   "lit",
 	Short: "Lit Envs CLI",
 	Long:  `Lit Envs is a tool to sync and manage your .env files.`,
-	// Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-	// },
 }
 
 func Execute() {

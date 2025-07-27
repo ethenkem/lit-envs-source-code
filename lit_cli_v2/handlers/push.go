@@ -17,38 +17,62 @@ import (
 const pushAPIURL = "http://localhost:8080"
 const dataFilePath = ".lit_env_data.toml"
 
-func loadPushToken() string {
-	file, err := os.Open(dataFilePath)
+type Auths struct {
+	Email string `toml:"email"`
+	Token string `toml:"token"`
+}
+
+type ActiveProject struct {
+	ID          string `toml:"id"`
+	ProjectName string `toml:"project_name"`
+}
+
+type Config struct {
+	Auths         Auths         `toml:"auths"`
+	ActiveProject ActiveProject `toml:"active_project"`
+}
+
+// LoadToken reads and returns the saved auth token from .lit_env_data.toml
+func LoadToken() string {
+	config, err := loadConfig()
 	if err != nil {
 		return ""
 	}
-	defer file.Close()
-
-	var config map[string]map[string]string
-	_ = toml.NewDecoder(file).Decode(&config)
-	return config["auths"]["token"]
+	return config.Auths.Token
 }
 
-func loadActiveProjectID() string {
-	file, err := os.Open(dataFilePath)
+// LoadProjectID returns the active project ID from .lit_env_data.toml
+func LoadActiveProjectID() string {
+	config, err := loadConfig()
 	if err != nil {
 		return ""
 	}
-	defer file.Close()
-
-	var config map[string]map[string]string
-	_ = toml.NewDecoder(file).Decode(&config)
-	return config["active_project"]["id"]
+	return config.ActiveProject.ID
 }
+
+// loadConfig decodes the TOML file into a Config struct
+func loadConfig() (*Config, error) {
+	data, err := os.ReadFile(dataFilePath)
+	if err != nil {
+		return nil, err
+	}
+	var config Config
+	err = toml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
 
 func PushEnvFile(filePath string) {
-	token := loadPushToken()
+	token := LoadToken()
 	if token == "" {
 		fmt.Println("🔑 Token not found. Please login first.")
 		return
 	}
 
-	projectID := loadActiveProjectID()
+	projectID := LoadActiveProjectID()
 	if projectID == "" {
 		fmt.Println("📁 Active project not found. Please select a project first.")
 		return

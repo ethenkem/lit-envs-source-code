@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+
 var PullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Pull environment variables from the server",
@@ -20,65 +21,19 @@ var PullCmd = &cobra.Command{
 	},
 }
 
-func loadToken() string {
-	data, err := os.ReadFile(".lit_env_data.toml")
-	if err != nil {
-		return ""
-	}
-	type Auths struct {
-		Email string `toml:"email"`
-		Token string `toml:"token"`
-	}
-	type Config struct {
-		Auths Auths `toml:"auths"`
-	}
 
-	// Simple TOML parse (for real use, you'd use BurntSushi/toml or similar)
-	return extractTOMLToken(data)
-}
-
-func loadProjectID() string {
-	data, err := os.ReadFile(".lit_env_data.toml")
-	if err != nil {
-		return ""
-	}
-	return extractTOMLProjectID(data)
-}
-
-func extractTOMLToken(data []byte) string {
-	// NOTE: Replace with real TOML parsing
-	if str := string(data); len(str) > 0 {
-		start := "token = \""
-		end := "\""
-		s := findBetween(str, start, end)
-		return s
-	}
-	return ""
-}
-
-func extractTOMLProjectID(data []byte) string {
-	// NOTE: Replace with real TOML parsing
-	if str := string(data); len(str) > 0 {
-		start := "id = \""
-		end := "\""
-		s := findBetween(str, start, end)
-		return s
-	}
-	return ""
-}
-
-func findBetween(s, start, end string) string {
-	startIdx := len(start) + len(s[:len(s)-len(start)]) - len(s)
-	if idx := len(s[:len(s)-len(end)]); idx >= startIdx {
-		return s[startIdx:idx]
-	}
-	return ""
-}
+// func findBetween(s, start, end string) string {
+// 	startIdx := len(start) + len(s[:len(s)-len(start)]) - len(s)
+// 	if idx := len(s[:len(s)-len(end)]); idx >= startIdx {
+// 		return s[startIdx:idx]
+// 	}
+// 	return ""
+// }
 
 func pullEnv() {
 	API_URL := "http://localhost:8080"
-	token := loadToken()
-	projectID := loadProjectID()
+	token := LoadToken()
+  projectID := LoadActiveProjectID()
 
 	if token == "" || projectID == "" {
 		fmt.Println("❌ Missing token or project ID.")
