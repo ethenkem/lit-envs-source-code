@@ -6,7 +6,7 @@
 # =========================
 # Go
 # =========================
-/lit_cli_v2/lit
+./lit_cli_v2/lit
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
@@ -201,8 +201,8 @@ target/
 
 ### NetBeans ###
 /nbproject/private/
-/nbbuild/
-/dist/
+nbbuild/
+dist/
 /nbdist/
 /.nb-gradle/
 build/
