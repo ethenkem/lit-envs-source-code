@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   Plus,
   Shield,
-  Eye,
-  EyeOff,
   Users,
   Terminal,
   Trash2,
@@ -18,14 +16,6 @@ import axios from 'axios';
 import { BACKEND_URL } from '../configs/constants';
 import { useAuth } from '../contexts/AuthContext';
 
-interface EnvVariable {
-  id: string;
-  key: string;
-  value: string;
-  encryptedValue: string;
-  lastUpdated: string;
-  updatedBy: string;
-}
 
 interface TeamMember {
   id: string;
@@ -36,15 +26,12 @@ interface TeamMember {
 
 
 const ProjectPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
   const [teamMembers, setTeamMembers] = useState<TeamMember[] | null>(null);
-  const [showEncrypted, setShowEncrypted] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false)
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const location = useLocation()
-
+  const navigate = useNavigate()
   const { user } = useAuth()
   const project = location.state.project
 
@@ -71,6 +58,21 @@ const ProjectPage: React.FC = () => {
     }
   };
 
+  const deleteProject = async (projectId: string) => {
+    try {
+
+      const res = await axios.delete(`${BACKEND_URL}/projects/?projectId=${projectId}`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`
+        }
+      })
+      navigate("/dashboard")
+
+    } catch (error) {
+      console.log(error);
+
+    }
+  };
 
 
   const removeCollab = async (userId: string) => {
@@ -123,14 +125,14 @@ const ProjectPage: React.FC = () => {
               <Users className="h-4 w-4 mr-2" />
               Invite
             </button>
-            {/*  <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            <button
+              onClick={() => deleteProject(project.id)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Variable
+              Delete
             </button>
-            */}
+
           </div>
         </div>
 
