@@ -62,13 +62,3 @@ Edit
 🗂️ Local Configuration (.lit_env_data.toml)
 The CLI stores your session and project info in:
 
-toml
-Copy
-Edit
-[auths]
-email = "user@example.com"
-token = "your-jwt-token"
-
-[active_project]
-project_name = "cool-app"
-id = "project-id-123"
