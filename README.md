@@ -38,15 +38,15 @@
 - Linux, macOS, or Windows (WSL recommended)
 
 ---
-
-### 🐹 Install Go CLI
-
-```bash
-git clone https://github.com/your-username/lit-envs.git
-cd lit-envs/cli-go
-go build -o lit
-The lit binary will be created in the current directory.
-```
+<!---->
+<!--### 🐹 Install Go CLI-->
+<!---->
+<!--```bash-->
+<!--git clone https://github.com/your-username/lit-envs.git-->
+<!--cd lit-envs/cli-go-->
+<!--go build -o lit-->
+<!--The lit binary will be created in the current directory.-->
+<!--```-->
 🚀 Usage
 bash
 Copy
