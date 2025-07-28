@@ -76,7 +76,6 @@ func SelectProject() {
 	s.Start()
 
 	req, _ := http.NewRequest("GET", apiURL+"/projects/active-projects", nil)
-  // fmt.Println(req.Body)
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	client := http.Client{Timeout: 30 * time.Second}

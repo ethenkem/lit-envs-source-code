@@ -87,4 +87,8 @@ public class ProjectModel {
     this.dotEnvData = dotEnvData;
   }
 
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
 }

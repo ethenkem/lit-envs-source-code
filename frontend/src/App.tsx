@@ -11,6 +11,7 @@ import SettingsPage from './pages/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import VerifyUser from './pages/VerifyUser';
 import DocsPage from './pages/DocsPage';
+import AcceptInvitePage from './pages/AcceptInvitePage';
 
 function App() {
   return (
@@ -21,8 +22,9 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
-            <Route path='/docs' element={<DocsPage />} />
+            <Route path="/docs" element={<DocsPage />} />
             <Route path="/verify-user" element={<VerifyUser />} />
+            <Route path="/accept-invite" element={<AcceptInvitePage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route
               path="/dashboard"

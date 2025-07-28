@@ -155,7 +155,7 @@ const ProjectPage: React.FC = () => {
                       Team Members
                     </dt>
                     <dd className="text-lg font-medium text-gray-900 dark:text-white">
-                      {project.members.length}
+                      {project.collaborators.length}
                     </dd>
                   </dl>
                 </div>
@@ -278,6 +278,7 @@ const ProjectPage: React.FC = () => {
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
         onSubmit={handleInviteUser}
+        projectId={project.id}
       />
     </DashboardLayout>
   );

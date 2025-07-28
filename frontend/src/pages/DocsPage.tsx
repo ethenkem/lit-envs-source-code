@@ -115,7 +115,7 @@ const DocsPage: React.FC = () => {
                     to use a different project's configuration.
                   </p>
                   <pre className="mt-2 bg-gray-100 dark:bg-gray-800 p-3 rounded-lg font-mono text-sm text-gray-900 dark:text-white">
-                    ./lit choose-project
+                    ./lit select
                   </pre>
                 </div>
               </div>

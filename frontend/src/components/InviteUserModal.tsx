@@ -1,27 +1,55 @@
 import React, { useState } from 'react';
 import { X, Loader2, Mail } from 'lucide-react';
+import axios from 'axios';
+import { BACKEND_URL } from '../configs/constants';
+import { useAuth } from '../contexts/AuthContext';
 
 interface InviteUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (email: string, role: 'editor' | 'viewer') => void;
+  projectId: string
 }
 
 const InviteUserModal: React.FC<InviteUserModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  projectId,
 }) => {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'editor' | 'viewer'>('viewer');
   const [isLoading, setIsLoading] = useState(false);
-
+  const [err, setErr] = useState<string | null>(null)
+  const { user } = useAuth()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    try {
+      console.log(projectId);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = await axios.post(`${BACKEND_URL}/projects/invite`, {
+        email: email,
+        projectId: projectId
+      }, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`
+        },
+      }
+      )
+      if (res.status == 200) {
+        alert("Invitation sent")
+      } else {
+
+        setErr(res.data.message)
+      }
+    } catch (err: any) {
+      //console.log(err);
+      setErr(err.response.data.message)
+      alert(err.response.data.message)
+
+    }
+
 
     onSubmit(email, role);
     setEmail('');
@@ -39,6 +67,9 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
             Invite Team Member
           </h3>
+          {err && <p className="text-lg font-medium text-gray-900 dark:text-white">
+            {err}
+          </p>}
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -66,7 +97,7 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
             </div>
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Role
             </label>
@@ -108,7 +139,7 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
                 </span>
               </label>
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-end space-x-3 pt-4">
             <button

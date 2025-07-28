@@ -21,11 +21,11 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      const res = await axios.post(`${BACKEND_URL}auths/obtain-token`, { email, password })
-      console.log(res.data);
+      const res = await axios.post(`${BACKEND_URL}/auths/obtain-token`, { email, password })
       login(res.data.data)
       navigate('/dashboard');
     } catch (err) {
+
       setError('Invalid email or password');
     } finally {
       setIsLoading(false);

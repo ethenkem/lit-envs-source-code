@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bookmie.lit.configs.components.CurrentUser;
 import com.bookmie.lit.projects.dtos.AddCollaboratorDto;
 import com.bookmie.lit.projects.dtos.CreateProjectDto;
+import com.bookmie.lit.projects.dtos.InviteUserDto;
 import com.bookmie.lit.projects.dtos.UpdateEnvDataDto;
 import com.bookmie.lit.utils.dtos.ResponseDto;
 
@@ -39,7 +40,7 @@ public class ProjectController {
 
   @GetMapping("/active-projects")
   public ResponseEntity<ResponseDto> getUsersActiveProjects(Authentication auth) {
-    ResponseDto res = this.projectService.getProjects(this.currentUser.getId());
+    ResponseDto res = this.projectService.getActiveProjects(this.currentUser.getId());
     return ResponseEntity.status(res.statusCode()).body(res);
   }
 
@@ -69,7 +70,13 @@ public class ProjectController {
     return ResponseEntity.status(res.statusCode()).body(res);
   }
 
-  @PostMapping("/add-collaborator")
+  @PostMapping("/invite")
+  public ResponseEntity<ResponseDto> pullEnvData(@RequestBody InviteUserDto data) throws Exception {
+    ResponseDto res = this.projectService.sendInvitation(data);
+    return ResponseEntity.status(res.statusCode()).body(res);
+  }
+
+  @PostMapping("/accept-invite")
   public ResponseEntity<ResponseDto> addCollaborator(@RequestBody AddCollaboratorDto data) {
     ResponseDto res = this.projectService.addCollaborator(data);
     return ResponseEntity.status(res.statusCode()).body(res);

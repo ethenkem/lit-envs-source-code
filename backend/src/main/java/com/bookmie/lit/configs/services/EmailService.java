@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
@@ -17,6 +18,7 @@ public class EmailService {
   @Value("${spring.mail.username}")
   private String fromEmail;
 
+  @Async
   public void sendSimpleEmail(String to, String subject, String body) {
     SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
     simpleMailMessage.setFrom(this.fromEmail);
@@ -32,6 +34,7 @@ public class EmailService {
     }
   }
 
+  @Async
   public void sendHtmlEmail(String to, String subject, String htmlBody) {
     jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
     try {

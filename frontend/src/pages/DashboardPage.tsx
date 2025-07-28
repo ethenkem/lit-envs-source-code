@@ -33,6 +33,7 @@ const DashboardPage: React.FC = () => {
   const [projects, setProjects] = useState<Project[] | []>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false)
   const { user } = useAuth()
 
   const filteredProjects = projects.filter(project =>
@@ -47,13 +48,15 @@ const DashboardPage: React.FC = () => {
   };
 
   const fetchProjects = async () => {
+    setLoading(true)
     try {
       console.log(user?.token);
 
-      const res = await axios.get(`${BACKEND_URL}/projects/`, { headers: { Authorization: `Bearer ${user?.token}` } })
+      const res = await axios.get(`${BACKEND_URL}/projects/active-projects`, { headers: { Authorization: `Bearer ${user?.token}` } })
       console.log(res.data);
-      
+
       setProjects(res.data.data)
+      setLoading(false)
     } catch (error) {
       console.log(error);
     }
@@ -104,7 +107,10 @@ const DashboardPage: React.FC = () => {
         </div>
 
         {/* Projects Grid */}
-        {filteredProjects.length === 0 ? (
+
+        {loading ? (
+          <h3 className='text-2xl text-gray-200'>Loading Projects...</h3>
+        ) : filteredProjects.length === 0 ? (
           <div className="text-center py-12">
             <Folder className="h-12 w-12 mx-auto text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">

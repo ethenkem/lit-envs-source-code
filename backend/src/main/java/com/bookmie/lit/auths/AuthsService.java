@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -57,11 +58,14 @@ public class AuthsService {
       return new ResponseDto(400, "Email already exists", null);
     }
     try {
-      String strNewPendingUser = objectMapper.writeValueAsString(newPendingUser);
-      if (this.redisTemplate.opsForValue().get(pendingUserId) != null) {
-        this.redisTemplate.opsForValue().getAndDelete(pendingUserId);
-      }
-      this.redisTemplate.opsForValue().set(pendingUserId, strNewPendingUser, 15, TimeUnit.MINUTES);
+      // String strNewPendingUser = objectMapper.writeValueAsString(newPendingUser);
+      // if (this.redisTemplate.opsForValue().get(pendingUserId) != null) {
+      // this.redisTemplate.opsForValue().getAndDelete(pendingUserId);
+      // }
+      // this.redisTemplate.opsForValue().set(pendingUserId, strNewPendingUser, 15,
+      // TimeUnit.MINUTES);
+      UserModel newUser = new UserModel(data.email(), password, hashedOtp);
+      this.userRepository.save(newUser);
 
       String html = EmailTemplateLoader.loadTemplate("verification_email.html");
       String msg = html.replace("123456", otpCOde);
@@ -75,18 +79,20 @@ public class AuthsService {
 
   public ResponseDto verifyUser(VerifyUserDto data) {
     System.out.println(data.token());
-    String pendingUserId = "pending_user_" + data.email();
-    Object pendingUser = this.redisTemplate.opsForValue().getAndDelete(pendingUserId);
-    if (pendingUser == null) {
-      Map<String, String> emailPayload = new HashMap<>();
-      emailPayload.put("email", data.email());
-      return new ResponseDto(400, "Invalid code or code", emailPayload);
+    //String pendingUserId = "pending_user_" + data.email();
+    Optional<UserModel>  pendingUserOtp = this.userRepository.findByEmail(data.email());
+
+    if (pendingUserOtp.isEmpty()) {
+      //Map<String, String> emailPayload = new HashMap<>();
+      //emailPayload.put("email", data.email());
+      return new ResponseDto(400, "Invalid code or code", null);
     }
     try {
-      PendingUserDto userObj = this.objectMapper.readValue(pendingUser.toString(), PendingUserDto.class);
-      if (this.passwordEncoder.matches(data.token(), userObj.getOtp())) {
-        UserModel newUser = new UserModel(userObj.getEmail(), userObj.getPassword());
-        this.userRepository.save(newUser);
+      //PendingUserDto userObj = this.objectMapper.readValue(pendingUser.toString(), PendingUserDto.class);
+      UserModel pendingUser = pendingUserOtp.get();
+      if (this.passwordEncoder.matches(data.token(), pendingUser.getOtp())) {
+        pendingUser.setOtp(null);
+        this.userRepository.save(pendingUser);
         return new ResponseDto(200, "Account has been created successfully", null);
       }
     } catch (Exception e) {
