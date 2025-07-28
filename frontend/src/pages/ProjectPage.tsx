@@ -123,13 +123,14 @@ const ProjectPage: React.FC = () => {
               <Users className="h-4 w-4 mr-2" />
               Invite
             </button>
-            <button
+            {/*  <button
               onClick={() => setIsAddModalOpen(true)}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Variable
             </button>
+            */}
           </div>
         </div>
 
@@ -190,7 +191,7 @@ const ProjectPage: React.FC = () => {
               <h2 className="text-lg font-medium text-gray-900 dark:text-white">
                 Environment Variables
               </h2>
-              <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+              {/*<div className="mt-4 sm:mt-0 flex items-center space-x-3">
                 <button
                   onClick={() => setShowEncrypted(!showEncrypted)}
                   className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${showEncrypted
@@ -211,6 +212,7 @@ const ProjectPage: React.FC = () => {
                   )}
                 </button>
               </div>
+              */}
             </div>
           </div>
 

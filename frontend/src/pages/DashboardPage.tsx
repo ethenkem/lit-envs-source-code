@@ -188,6 +188,7 @@ const DashboardPage: React.FC = () => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateProject}
+        fetchProjects={fetchProjects}
       />
     </DashboardLayout>
   );

@@ -2,17 +2,20 @@ import React, { useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { BACKEND_URL } from '../configs/constants';
 
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (name: string, description: string) => void;
+  fetchProjects: () => void;
 }
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  fetchProjects
 }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -23,13 +26,14 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await axios.post("http://localhost:8080/projects/create", { projectName: name, description }, { headers: { Authorization: `Bearer ${user?.token}` } })
+      const res = await axios.post(`${BACKEND_URL}/projects/create`, { projectName: name, description }, { headers: { Authorization: `Bearer ${user?.token}` } })
       console.log(res.data);
       onSubmit(name, description);
       setName('');
       setDescription('');
       setIsLoading(false);
       onClose();
+      fetchProjects()
     } catch (error) {
       console.log(error);
     }
