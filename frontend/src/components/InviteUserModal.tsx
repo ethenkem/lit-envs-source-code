@@ -7,14 +7,12 @@ import { useAuth } from '../contexts/AuthContext';
 interface InviteUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (email: string, role: 'editor' | 'viewer') => void;
   projectId: string
 }
 
 const InviteUserModal: React.FC<InviteUserModalProps> = ({
   isOpen,
   onClose,
-  onSubmit,
   projectId,
 }) => {
   const [email, setEmail] = useState('');
@@ -51,7 +49,7 @@ const InviteUserModal: React.FC<InviteUserModalProps> = ({
     }
 
 
-    onSubmit(email, role);
+    //onSubmit(email, role);
     setEmail('');
     setRole('viewer');
     setIsLoading(false);

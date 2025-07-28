@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const pushAPIURL = "http://localhost:8080"
+const pushAPIURL = "https://lit-backend-479881079038.europe-west1.run.app"
 const dataFilePath = ".lit_env_data.toml"
 
 type Auths struct {

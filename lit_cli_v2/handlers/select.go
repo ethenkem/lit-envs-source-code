@@ -75,7 +75,7 @@ func SelectProject() {
 	s.Suffix = " Fetching projects..."
 	s.Start()
 
-	req, _ := http.NewRequest("GET", apiURL+"/projects/active-projects", nil)
+	req, _ := http.NewRequest("GET", apiBackend + "/projects/active-projects", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	client := http.Client{Timeout: 30 * time.Second}

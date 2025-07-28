@@ -1,5 +1,6 @@
 package com.bookmie.lit.users;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import com.bookmie.lit.users.dtos.*;
 @Repository
 public interface UserRepository extends MongoRepository<UserModel, String> {
   Optional<UserModel> findByEmail(String email);
+   List<UserModel> findAllByIdIn(Collection<String> ids);
 
   //List<UserSummary> customFindAllById(Iterable<String> ids);
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -6,18 +6,17 @@ import {
   Shield,
   Eye,
   EyeOff,
-  Edit3,
-  Trash2,
   Users,
   Terminal,
-  Copy,
-  Check,
-  Search,
-  Filter
+  Trash2,
+
 } from 'lucide-react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
 import AddVariableModal from '../components/AddVariableModal';
 import InviteUserModal from '../components/InviteUserModal';
+import axios from 'axios';
+import { BACKEND_URL } from '../configs/constants';
+import { useAuth } from '../contexts/AuthContext';
 
 interface EnvVariable {
   id: string;
@@ -30,69 +29,69 @@ interface EnvVariable {
 
 interface TeamMember {
   id: string;
-  name: string;
   email: string;
-  avatar: string;
-  role: 'owner' | 'editor' | 'viewer';
+
 }
 
-const mockTeamMembers: TeamMember[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=3B82F6&color=fff',
-    role: 'owner'
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    avatar: 'https://ui-avatars.com/api/?name=Jane+Smith&background=10B981&color=fff',
-    role: 'editor'
-  },
-  {
-    id: '3',
-    name: 'Bob Wilson',
-    email: 'bob@example.com',
-    avatar: 'https://ui-avatars.com/api/?name=Bob+Wilson&background=F59E0B&color=fff',
-    role: 'viewer'
-  }
-];
+
 
 const ProjectPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(mockTeamMembers);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[] | null>(null);
   const [showEncrypted, setShowEncrypted] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const location = useLocation()
+
+  const { user } = useAuth()
   const project = location.state.project
 
   const handleAddVariable = (key: string, value: string) => {
   };
 
-  const handleInviteUser = (email: string, role: 'editor' | 'viewer') => {
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      name: email.split('@')[0],
-      email,
-      avatar: `https://ui-avatars.com/api/?name=${email.split('@')[0]}&background=6366F1&color=fff`,
-      role
-    };
-    setTeamMembers([...teamMembers, newMember]);
-  };
 
-  const copyToClipboard = async (text: string, id: string) => {
+
+  const fetchUsers = async () => {
     try {
-      await navigator.clipboard.writeText(text);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
+      setDeleting(true)
+      const res = await axios.get(`${BACKEND_URL}/projects/collabs/${project.id}`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`
+        }
+      })
+      setTeamMembers(res.data.data)
+      setDeleting(false)
+    } catch (error) {
+      console.log(error);
+
+      setDeleting(false)
+
     }
   };
+
+
+
+  const removeCollab = async (userId: string) => {
+    try {
+
+      const res = await axios.delete(`${BACKEND_URL}/projects/${project.id}/collabs/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${user?.token}`
+        }
+      })
+      setTeamMembers(res.data.data)
+
+    } catch (error) {
+      console.log(error);
+
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers()
+  }, [])
 
   return (
     <DashboardLayout>
@@ -236,30 +235,25 @@ const ProjectPage: React.FC = () => {
             </h2>
           </div>
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {teamMembers.map((member) => (
+            {teamMembers?.map((member) => (
               <div key={member.id} className="p-6 flex items-center justify-between">
                 <div className="flex items-center">
                   <img
                     className="h-10 w-10 rounded-full"
-                    src={member.avatar}
-                    alt={member.name}
+                    src={`https://ui-avatars.com/api/?name=${member.email.split('@')[0]}&background=6366F1&color=fff`}
                   />
                   <div className="ml-4">
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      {member.name}
+                      {member.email.split('@')[0]}
                     </div>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
                       {member.email}
                     </div>
                   </div>
                 </div>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${member.role === 'owner'
-                  ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
-                  : member.role === 'editor'
-                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                  }`}>
-                  {member.role}
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium`}>
+
+                  {deleting ? <p>Deleting</p> : <Trash2 color='red' onClick={() => removeCollab(member.id)} />}
                 </span>
               </div>
             ))}
@@ -277,7 +271,6 @@ const ProjectPage: React.FC = () => {
       <InviteUserModal
         isOpen={isInviteModalOpen}
         onClose={() => setIsInviteModalOpen(false)}
-        onSubmit={handleInviteUser}
         projectId={project.id}
       />
     </DashboardLayout>

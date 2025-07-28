@@ -31,7 +31,7 @@ var PullCmd = &cobra.Command{
 // }
 
 func pullEnv() {
-	API_URL := "http://localhost:8080"
+	API_URL := "https://lit-backend-479881079038.europe-west1.run.app"
 	token := LoadToken()
   projectID := LoadActiveProjectID()
 

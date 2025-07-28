@@ -81,4 +81,19 @@ public class ProjectController {
     ResponseDto res = this.projectService.addCollaborator(data);
     return ResponseEntity.status(res.statusCode()).body(res);
   }
+
+  @GetMapping("/collabs/{projectId}")
+  public ResponseEntity<ResponseDto> getCollabs(@PathVariable String projectId) {
+    ResponseDto res = this.projectService.getCollaboratorDetails(projectId);
+    return ResponseEntity.status(res.statusCode()).body(res);
+  }
+
+  @DeleteMapping("/{projectId}/collabs/{userId}")
+  public ResponseEntity<ResponseDto> removeCollaborator(
+      @PathVariable String projectId,
+      @PathVariable String userId) {
+    ResponseDto response = projectService.removeCollaborator(projectId, userId);
+    return ResponseEntity.status(response.statusCode()).body(response);
+  }
+
 }

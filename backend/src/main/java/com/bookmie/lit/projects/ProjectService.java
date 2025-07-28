@@ -2,6 +2,7 @@ package com.bookmie.lit.projects;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import com.bookmie.lit.projects.dtos.CreateProjectDto;
 import com.bookmie.lit.projects.dtos.InviteUserDto;
 import com.bookmie.lit.users.UserModel;
 import com.bookmie.lit.users.UserRepository;
+import com.bookmie.lit.users.dtos.UserPublicDto;
 import com.bookmie.lit.utils.EmailTemplateLoader;
 import com.bookmie.lit.utils.dtos.ResponseDto;
 
@@ -107,7 +109,7 @@ public class ProjectService {
   }
 
   public ResponseDto addCollaborator(AddCollaboratorDto data) {
-    //System.out.println("sksks");
+    // System.out.println("sksks");
     Optional<ProjectModel> projectOtp = this.projectRepo.findById(data.projectId());
     if (projectOtp.isEmpty()) {
       return new ResponseDto(404, "project not found", null);
@@ -122,6 +124,53 @@ public class ProjectService {
     projectRepo.save(project);
 
     return new ResponseDto(200, "User added as collaborator", null);
+  }
+
+  public ResponseDto getCollaboratorDetails(String projectId) {
+    Optional<ProjectModel> projectOpt = projectRepo.findById(projectId);
+
+    if (projectOpt.isEmpty()) {
+      return new ResponseDto(404, "Project not found", null);
+    }
+
+    ProjectModel project = projectOpt.get();
+    Set<String> collaboratorIds = project.getCollaborators();
+
+    List<UserModel> users = usersRepo.findAllByIdIn(collaboratorIds);
+
+    // Convert to DTOs
+    List<UserPublicDto> collaborators = users.stream()
+        .map(user -> new UserPublicDto(user.getId(), user.getEmail()))
+        .toList();
+
+    return new ResponseDto(200, "Collaborators fetched", collaborators);
+  }
+
+  public ResponseDto removeCollaborator(String projectId, String userId) {
+    Optional<ProjectModel> projectOtp = this.projectRepo.findById(projectId);
+    if (projectOtp.isEmpty()) {
+      return new ResponseDto(404, "Project not found", null);
+    }
+
+    ProjectModel project = projectOtp.get();
+
+    if (!project.getCollaborators().contains(userId)) {
+      return new ResponseDto(400, "User is not a collaborator", null);
+    }
+
+    project.getCollaborators().remove(userId);
+    projectRepo.save(project);
+    Set<String> collaboratorIds = project.getCollaborators();
+
+    List<UserModel> users = usersRepo.findAllByIdIn(collaboratorIds);
+
+    // Convert to DTOs
+    List<UserPublicDto> collaborators = users.stream()
+        .map(user -> new UserPublicDto(user.getId(), user.getEmail()))
+        .toList();
+
+    return new ResponseDto(200, "Collaborator deleted", collaborators);
+
   }
 
 }
