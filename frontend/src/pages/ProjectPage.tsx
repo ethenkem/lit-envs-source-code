@@ -30,6 +30,7 @@ const ProjectPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false)
+  const [deletingProject, setDeletingProject] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -60,17 +61,17 @@ const ProjectPage: React.FC = () => {
 
   const deleteProject = async (projectId: string) => {
     try {
-
+      setDeletingProject(true)
       const res = await axios.delete(`${BACKEND_URL}/projects/${projectId}`, {
         headers: {
           Authorization: `Bearer ${user?.token}`
         }
       })
       navigate("/dashboard")
-
+      setDeletingProject(false)
     } catch (error) {
       console.log(error);
-
+      setDeletingProject(false)
     }
   };
 
@@ -129,7 +130,7 @@ const ProjectPage: React.FC = () => {
               onClick={() => deleteProject(project.id)}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
             >
-              Delete
+              {deletingProject? "Deleting..." : "Delete"}
             </button>
 
           </div>

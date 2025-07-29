@@ -50,7 +50,7 @@ public class ProjectController {
     return ResponseEntity.status(response.statusCode()).body(response);
   }
 
-  @DeleteMapping("/delete/{projectId}")
+  @DeleteMapping("/{projectId}")
   public ResponseEntity<ResponseDto> deleteProject(Authentication auth, @PathVariable String projectId) {
     ResponseDto response = this.projectService.deleteProject(projectId, this.currentUser.getId());
     return ResponseEntity.status(response.statusCode()).body(response);
