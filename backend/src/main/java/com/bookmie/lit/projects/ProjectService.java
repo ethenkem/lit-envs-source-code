@@ -17,6 +17,8 @@ import com.bookmie.lit.users.UserRepository;
 import com.bookmie.lit.users.dtos.UserPublicDto;
 import com.bookmie.lit.utils.EmailTemplateLoader;
 import com.bookmie.lit.utils.dtos.ResponseDto;
+import com.bookmie.lit.utils.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 
 @Service
 public class ProjectService {
@@ -35,7 +37,7 @@ public class ProjectService {
 
   public ResponseDto createProject(CreateProjectDto data, String userId) {
     if (this.projectRepo.findByProjectName(data.projectName()).isPresent()) {
-      return new ResponseDto(409, "Project with similar name already exists", null);
+      throw new ApiException(HttpStatus.CONFLICT, "Project with similar name already exists");
     }
     ProjectModel project = new ProjectModel(data.projectName(), data.description(), userId);
     project.addCollaborator(userId);
@@ -48,7 +50,7 @@ public class ProjectService {
       this.projectRepo.deleteById(projectId);
       return new ResponseDto(200, "Project deleted", null);
     }
-    return new ResponseDto(400, "No active Project", null);
+    throw new ApiException(HttpStatus.BAD_REQUEST, "No active Project");
   }
 
   public ResponseDto getProjects(String userId) {
@@ -64,6 +66,9 @@ public class ProjectService {
 
   public ResponseDto pullEnvContent(String projectId) {
     Optional<ProjectModel> project = this.projectRepo.findById(projectId);
+    if (project.isEmpty()) {
+      throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
+    }
     String decryptedEnv = this.operations.decryptEnvData(project.get().getDotEnvData());
     return new ResponseDto(200, "successfull", decryptedEnv);
   }
@@ -77,25 +82,25 @@ public class ProjectService {
       this.projectRepo.save(projectObj);
       return new ResponseDto(200, "successfull", null);
     }
-    return new ResponseDto(404, "not found", null);
+    throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
   }
 
   public ResponseDto sendInvitation(InviteUserDto request) throws Exception {
     Optional<ProjectModel> projectOpt = projectRepo.findById(request.projectId());
     if (projectOpt.isEmpty()) {
-      return new ResponseDto(404, "Project not found", null);
+      throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
     }
 
     Optional<UserModel> userOpt = this.usersRepo.findByEmail(request.email());
     if (userOpt.isEmpty()) {
-      return new ResponseDto(404, "No user found with this email", null);
+      throw new ApiException(HttpStatus.NOT_FOUND, "No user found with this email");
     }
 
     UserModel user = userOpt.get();
     ProjectModel project = projectOpt.get();
 
     if (project.getCollaborators().contains(user.getId())) {
-      return new ResponseDto(400, "User is already a collaborator", null);
+      throw new ApiException(HttpStatus.BAD_REQUEST, "User is already a collaborator");
     }
     String inviteLink = String.format(
         "https://lit.bookmie.com/accept-invite?projectId=%s&userId=%s",
@@ -112,12 +117,12 @@ public class ProjectService {
     // System.out.println("sksks");
     Optional<ProjectModel> projectOtp = this.projectRepo.findById(data.projectId());
     if (projectOtp.isEmpty()) {
-      return new ResponseDto(404, "project not found", null);
+      throw new ApiException(HttpStatus.NOT_FOUND, "project not found");
     }
     ProjectModel project = projectOtp.get();
 
     if (project.getCollaborators().contains(data.userId())) {
-      return new ResponseDto(400, "User is already a collaborator", null);
+      throw new ApiException(HttpStatus.BAD_REQUEST, "User is already a collaborator");
     }
 
     project.addCollaborator(data.userId());
@@ -130,7 +135,7 @@ public class ProjectService {
     Optional<ProjectModel> projectOpt = projectRepo.findById(projectId);
 
     if (projectOpt.isEmpty()) {
-      return new ResponseDto(404, "Project not found", null);
+      throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
     }
 
     ProjectModel project = projectOpt.get();
@@ -149,13 +154,13 @@ public class ProjectService {
   public ResponseDto removeCollaborator(String projectId, String userId) {
     Optional<ProjectModel> projectOtp = this.projectRepo.findById(projectId);
     if (projectOtp.isEmpty()) {
-      return new ResponseDto(404, "Project not found", null);
+      throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
     }
 
     ProjectModel project = projectOtp.get();
 
     if (!project.getCollaborators().contains(userId)) {
-      return new ResponseDto(400, "User is not a collaborator", null);
+      throw new ApiException(HttpStatus.BAD_REQUEST, "User is not a collaborator");
     }
 
     project.getCollaborators().remove(userId);

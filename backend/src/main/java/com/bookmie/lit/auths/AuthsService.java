@@ -22,6 +22,8 @@ import com.bookmie.lit.users.UserModel;
 import com.bookmie.lit.users.UserRepository;
 import com.bookmie.lit.utils.Contrib;
 import com.bookmie.lit.utils.dtos.ResponseDto;
+import com.bookmie.lit.utils.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -55,7 +57,7 @@ public class AuthsService {
     String hashedOtp = this.passwordEncoder.encode(otpCOde);
     PendingUserDto newPendingUser = new PendingUserDto(email, password, hashedOtp);
     if (this.userRepository.findByEmail(email).isPresent()) {
-      return new ResponseDto(400, "Email already exists", null);
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Email already exists");
     }
     try {
       // String strNewPendingUser = objectMapper.writeValueAsString(newPendingUser);
@@ -73,7 +75,7 @@ public class AuthsService {
       return new ResponseDto(200, "Verification code sent to " + email, null);
     } catch (Exception e) {
       System.out.println(e);
-      return new ResponseDto(400, "Registration failed", null);
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Registration failed", e.getMessage());
     }
   }
 
@@ -85,7 +87,7 @@ public class AuthsService {
     if (pendingUserOtp.isEmpty()) {
       //Map<String, String> emailPayload = new HashMap<>();
       //emailPayload.put("email", data.email());
-      return new ResponseDto(400, "Invalid code or code", null);
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid code or code");
     }
     try {
       //PendingUserDto userObj = this.objectMapper.readValue(pendingUser.toString(), PendingUserDto.class);
@@ -98,14 +100,14 @@ public class AuthsService {
     } catch (Exception e) {
       System.out.println(e);
       System.out.println(e.getStackTrace());
-      return new ResponseDto(500, "Invalid code or code", null);
+      throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid code or code", e.getMessage());
     }
-    return new ResponseDto(400, "Invalid code or code", null);
+    throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid code or code");
   }
 
   public AuthResponseDto getToken(String email, String password) {
     UserModel user = this.userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "User not found with email: " + email));
     if (this.passwordEncoder.matches(password, user.getPassword())) {
       String token = this.jwtService.generateToken(user.getId(), user.getEmail());
       Map<String, String> userObj = new HashMap<>();
@@ -115,7 +117,7 @@ public class AuthsService {
       userObj.put("joinedOn", user.getJoinedOn() != null ? user.getJoinedOn().toString() : null);
       return new AuthResponseDto(200, "login successful", userObj);
     }
-    return new AuthResponseDto(401, "login failed", null);
+    throw new ApiException(HttpStatus.UNAUTHORIZED, "login failed");
   }
 
   public Optional<UserModel> loadUserByUserId(String userId) {

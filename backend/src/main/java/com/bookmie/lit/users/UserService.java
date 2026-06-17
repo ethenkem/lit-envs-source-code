@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.bookmie.lit.users.dtos.SearchRequestDto;
 import com.bookmie.lit.utils.dtos.ResponseDto;
+import com.bookmie.lit.utils.exceptions.ApiException;
 
 @Service
 class UserService {
@@ -19,7 +21,7 @@ class UserService {
   public ResponseDto searchUser(SearchRequestDto data) {
     Optional<UserModel> user = this.userRepository.findByEmail(data.userEmail());
     if (user.isEmpty()) {
-      return new ResponseDto(404, "user not found", null);
+      throw new ApiException(HttpStatus.NOT_FOUND, "user not found");
     }
     Map<String, String> userData = new HashMap<>();
     userData.put("email", user.get().getEmail());
