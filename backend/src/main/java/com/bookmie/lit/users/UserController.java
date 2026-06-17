@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bookmie.lit.users.dtos.SearchRequestDto;
+import com.bookmie.lit.utils.ResponseFactory;
 import com.bookmie.lit.utils.dtos.ApiResponse;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -22,13 +22,6 @@ public class UserController {
 
   @PostMapping("/search")
   public ResponseEntity<ApiResponse<Map<String, String>>> searchUser(@RequestBody SearchRequestDto data) {
-    Map<String, String> userData = this.userService.searchUser(data);
-    ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
-        .success(true)
-        .message("user found")
-        .data(userData)
-        .timestamp(LocalDateTime.now())
-        .build();
-    return ResponseEntity.ok(response);
+    return ResponseFactory.ok("user found", this.userService.searchUser(data));
   }
 }
