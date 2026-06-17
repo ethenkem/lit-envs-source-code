@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bookmie.lit.configs.services.EmailService;
@@ -20,20 +19,16 @@ import com.bookmie.lit.utils.exceptions.BadRequestException;
 import com.bookmie.lit.utils.exceptions.DuplicateResourceException;
 import com.bookmie.lit.utils.exceptions.ResourceNotFoundException;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class ProjectService {
 
-  @Autowired
-  private ProjectRepo projectRepo;
-
-  @Autowired
-  private OpsService operations;
-
-  @Autowired
-  private EmailService emailService;
-
-  @Autowired
-  private UserRepository usersRepo;
+  private final ProjectRepo projectRepo;
+  private final OpsService operations;
+  private final EmailService emailService;
+  private final UserRepository usersRepo;
 
   public ProjectModel createProject(CreateProjectDto data, String userId) {
     if (this.projectRepo.findByProjectName(data.projectName()).isPresent()) {
@@ -72,8 +67,7 @@ public class ProjectService {
     Optional<ProjectModel> project = this.projectRepo.findByIdAndOwner(projectId, userId);
     if (project.isPresent()) {
       ProjectModel projectObj = project.get();
-      String securedData = this.operations.encryptEnvData(envData);
-      projectObj.setDotEnvData(securedData);
+      projectObj.setDotEnvData(this.operations.encryptEnvData(envData));
       this.projectRepo.save(projectObj);
       return;
     }
@@ -81,18 +75,10 @@ public class ProjectService {
   }
 
   public void sendInvitation(InviteUserDto request) throws Exception {
-    Optional<ProjectModel> projectOpt = projectRepo.findById(request.projectId());
-    if (projectOpt.isEmpty()) {
-      throw new ResourceNotFoundException("Project", request.projectId());
-    }
-
-    Optional<UserModel> userOpt = this.usersRepo.findByEmail(request.email());
-    if (userOpt.isEmpty()) {
-      throw new ResourceNotFoundException("User", request.email());
-    }
-
-    UserModel user = userOpt.get();
-    ProjectModel project = projectOpt.get();
+    ProjectModel project = this.projectRepo.findById(request.projectId())
+        .orElseThrow(() -> new ResourceNotFoundException("Project", request.projectId()));
+    UserModel user = this.usersRepo.findByEmail(request.email())
+        .orElseThrow(() -> new ResourceNotFoundException("User", request.email()));
 
     if (project.getCollaborators().contains(user.getId())) {
       throw new BadRequestException("User is already a collaborator");
@@ -102,62 +88,37 @@ public class ProjectService {
         project.getId(), user.getId());
     String html = EmailTemplateLoader.loadTemplate("invite.html");
     String msg = html.replace("{{inviteLink}}", inviteLink).replace("{{projectName}}", project.getProjectName());
-
     this.emailService.sendHtmlEmail(user.getEmail(), "Lit Envs Verification", msg);
   }
 
   public void addCollaborator(AddCollaboratorDto data) {
-    Optional<ProjectModel> projectOtp = this.projectRepo.findById(data.projectId());
-    if (projectOtp.isEmpty()) {
-      throw new ResourceNotFoundException("Project", data.projectId());
-    }
-    ProjectModel project = projectOtp.get();
-
+    ProjectModel project = this.projectRepo.findById(data.projectId())
+        .orElseThrow(() -> new ResourceNotFoundException("Project", data.projectId()));
     if (project.getCollaborators().contains(data.userId())) {
       throw new BadRequestException("User is already a collaborator");
     }
-
     project.addCollaborator(data.userId());
-    projectRepo.save(project);
+    this.projectRepo.save(project);
   }
 
   public List<UserPublicDto> getCollaboratorDetails(String projectId) {
-    Optional<ProjectModel> projectOpt = projectRepo.findById(projectId);
-
-    if (projectOpt.isEmpty()) {
-      throw new ResourceNotFoundException("Project", projectId);
-    }
-
-    ProjectModel project = projectOpt.get();
-    Set<String> collaboratorIds = project.getCollaborators();
-
-    List<UserModel> users = usersRepo.findAllByIdIn(collaboratorIds);
-
-    // Convert to DTOs
+    ProjectModel project = this.projectRepo.findById(projectId)
+        .orElseThrow(() -> new ResourceNotFoundException("Project", projectId));
+    List<UserModel> users = this.usersRepo.findAllByIdIn(project.getCollaborators());
     return users.stream()
         .map(user -> new UserPublicDto(user.getId(), user.getEmail()))
         .toList();
   }
 
   public List<UserPublicDto> removeCollaborator(String projectId, String userId) {
-    Optional<ProjectModel> projectOtp = this.projectRepo.findById(projectId);
-    if (projectOtp.isEmpty()) {
-      throw new ResourceNotFoundException("Project", projectId);
-    }
-
-    ProjectModel project = projectOtp.get();
-
+    ProjectModel project = this.projectRepo.findById(projectId)
+        .orElseThrow(() -> new ResourceNotFoundException("Project", projectId));
     if (!project.getCollaborators().contains(userId)) {
       throw new BadRequestException("User is not a collaborator");
     }
-
     project.getCollaborators().remove(userId);
-    projectRepo.save(project);
-    Set<String> collaboratorIds = project.getCollaborators();
-
-    List<UserModel> users = usersRepo.findAllByIdIn(collaboratorIds);
-
-    // Convert to DTOs
+    this.projectRepo.save(project);
+    List<UserModel> users = this.usersRepo.findAllByIdIn(project.getCollaborators());
     return users.stream()
         .map(user -> new UserPublicDto(user.getId(), user.getEmail()))
         .toList();

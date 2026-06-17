@@ -4,17 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bookmie.lit.users.dtos.SearchRequestDto;
 import com.bookmie.lit.utils.exceptions.ResourceNotFoundException;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 class UserService {
 
-  @Autowired
-  private UserRepository userRepository;
+  private final UserRepository userRepository;
 
   public Map<String, String> searchUser(SearchRequestDto data) {
     Optional<UserModel> user = this.userRepository.findByEmail(data.userEmail());

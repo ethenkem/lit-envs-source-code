@@ -1,6 +1,5 @@
 package com.bookmie.lit.auths;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,14 +12,16 @@ import com.bookmie.lit.auths.dtos.VerifyUserDto;
 import com.bookmie.lit.utils.ResponseFactory;
 import com.bookmie.lit.utils.dtos.ApiResponse;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auths")
+@RequiredArgsConstructor
 public class AuthsController {
 
-  @Autowired
-  private AuthsService authsService;
+  private final AuthsService authsService;
 
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<Void>> registerUser(@RequestBody RegisterDto requestData) {
@@ -36,7 +37,6 @@ public class AuthsController {
 
   @PostMapping("/obtain-token")
   public ResponseEntity<ApiResponse<Map<String, String>>> obtainToken(@RequestBody GetTokenDto requestData) {
-    Map<String, String> tokenData = this.authsService.getToken(requestData.email(), requestData.password());
-    return ResponseFactory.ok("login successful", tokenData);
+    return ResponseFactory.ok("login successful", this.authsService.getToken(requestData.email(), requestData.password()));
   }
 }

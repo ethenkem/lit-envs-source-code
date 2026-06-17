@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,20 +20,16 @@ import com.bookmie.lit.utils.exceptions.DuplicateResourceException;
 import com.bookmie.lit.utils.exceptions.ResourceNotFoundException;
 import com.bookmie.lit.utils.exceptions.UnauthorizedException;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AuthsService {
 
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private PasswordEncoder passwordEncoder;
-
-  @Autowired
-  private EmailService emailService;
-
-  @Autowired
-  private JwtService jwtService;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final EmailService emailService;
+  private final JwtService jwtService;
 
   public void registerUser(RegisterDto data) {
     String email = data.email();
@@ -47,7 +42,6 @@ public class AuthsService {
     try {
       UserModel newUser = new UserModel(data.email(), password, hashedOtp);
       this.userRepository.save(newUser);
-
       String html = EmailTemplateLoader.loadTemplate("verification_email.html");
       String msg = html.replace("123456", otpCOde);
       this.emailService.sendHtmlEmail(email, "Lit Envs Verification", msg);
@@ -60,7 +54,6 @@ public class AuthsService {
   public void verifyUser(VerifyUserDto data) {
     System.out.println(data.token());
     Optional<UserModel> pendingUserOtp = this.userRepository.findByEmail(data.email());
-
     if (pendingUserOtp.isEmpty()) {
       throw new BadRequestException("Invalid code or email");
     }
@@ -73,7 +66,6 @@ public class AuthsService {
       }
     } catch (Exception e) {
       System.out.println(e);
-      System.out.println(e.getStackTrace());
       throw new BadRequestException("Invalid code or OTP logic error: " + e.getMessage());
     }
     throw new BadRequestException("Invalid code or OTP");
