@@ -16,9 +16,9 @@ import com.bookmie.lit.users.UserModel;
 import com.bookmie.lit.users.UserRepository;
 import com.bookmie.lit.users.dtos.UserPublicDto;
 import com.bookmie.lit.utils.EmailTemplateLoader;
-import com.bookmie.lit.utils.dtos.ResponseDto;
-import com.bookmie.lit.utils.exceptions.ApiException;
-import org.springframework.http.HttpStatus;
+import com.bookmie.lit.utils.exceptions.BadRequestException;
+import com.bookmie.lit.utils.exceptions.DuplicateResourceException;
+import com.bookmie.lit.utils.exceptions.ResourceNotFoundException;
 
 @Service
 public class ProjectService {
@@ -35,72 +35,67 @@ public class ProjectService {
   @Autowired
   private UserRepository usersRepo;
 
-  public ResponseDto createProject(CreateProjectDto data, String userId) {
+  public ProjectModel createProject(CreateProjectDto data, String userId) {
     if (this.projectRepo.findByProjectName(data.projectName()).isPresent()) {
-      throw new ApiException(HttpStatus.CONFLICT, "Project with similar name already exists");
+      throw new DuplicateResourceException("Project with similar name already exists");
     }
     ProjectModel project = new ProjectModel(data.projectName(), data.description(), userId);
     project.addCollaborator(userId);
-    this.projectRepo.save(project);
-    return new ResponseDto(201, "Project Added", null);
+    return this.projectRepo.save(project);
   }
 
-  public ResponseDto deleteProject(String projectId, String userId) {
+  public void deleteProject(String projectId, String userId) {
     if (this.projectRepo.findByIdAndOwner(projectId, userId).isPresent()) {
       this.projectRepo.deleteById(projectId);
-      return new ResponseDto(200, "Project deleted", null);
+      return;
     }
-    throw new ApiException(HttpStatus.BAD_REQUEST, "No active Project");
+    throw new BadRequestException("No active Project with ID: " + projectId + " owned by current user");
   }
 
-  public ResponseDto getProjects(String userId) {
-
-    List<ProjectModel> projects = this.projectRepo.findByCollaboratorsContaining(userId);
-    return new ResponseDto(200, "successfull", projects);
+  public List<ProjectModel> getProjects(String userId) {
+    return this.projectRepo.findByCollaboratorsContaining(userId);
   }
 
-  public ResponseDto getActiveProjects(String userId) {
-    List<ProjectModel> projects = this.projectRepo.findByCollaboratorsContaining(userId);
-    return new ResponseDto(200, "successfull", projects);
+  public List<ProjectModel> getActiveProjects(String userId) {
+    return this.projectRepo.findByCollaboratorsContaining(userId);
   }
 
-  public ResponseDto pullEnvContent(String projectId) {
+  public String pullEnvContent(String projectId) {
     Optional<ProjectModel> project = this.projectRepo.findById(projectId);
     if (project.isEmpty()) {
-      throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
+      throw new ResourceNotFoundException("Project", projectId);
     }
-    String decryptedEnv = this.operations.decryptEnvData(project.get().getDotEnvData());
-    return new ResponseDto(200, "successfull", decryptedEnv);
+    return this.operations.decryptEnvData(project.get().getDotEnvData());
   }
 
-  public ResponseDto updateEnvData(String projectId, String envData, String userId) {
+  public void updateEnvData(String projectId, String envData, String userId) {
     Optional<ProjectModel> project = this.projectRepo.findByIdAndOwner(projectId, userId);
     if (project.isPresent()) {
       ProjectModel projectObj = project.get();
       String securedData = this.operations.encryptEnvData(envData);
       projectObj.setDotEnvData(securedData);
       this.projectRepo.save(projectObj);
-      return new ResponseDto(200, "successfull", null);
+      return;
     }
-    throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
+    throw new ResourceNotFoundException("Project", projectId);
   }
 
-  public ResponseDto sendInvitation(InviteUserDto request) throws Exception {
+  public void sendInvitation(InviteUserDto request) throws Exception {
     Optional<ProjectModel> projectOpt = projectRepo.findById(request.projectId());
     if (projectOpt.isEmpty()) {
-      throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
+      throw new ResourceNotFoundException("Project", request.projectId());
     }
 
     Optional<UserModel> userOpt = this.usersRepo.findByEmail(request.email());
     if (userOpt.isEmpty()) {
-      throw new ApiException(HttpStatus.NOT_FOUND, "No user found with this email");
+      throw new ResourceNotFoundException("User", request.email());
     }
 
     UserModel user = userOpt.get();
     ProjectModel project = projectOpt.get();
 
     if (project.getCollaborators().contains(user.getId())) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "User is already a collaborator");
+      throw new BadRequestException("User is already a collaborator");
     }
     String inviteLink = String.format(
         "https://lit.bookmie.com/accept-invite?projectId=%s&userId=%s",
@@ -109,33 +104,28 @@ public class ProjectService {
     String msg = html.replace("{{inviteLink}}", inviteLink).replace("{{projectName}}", project.getProjectName());
 
     this.emailService.sendHtmlEmail(user.getEmail(), "Lit Envs Verification", msg);
-
-    return new ResponseDto(200, "Invitation sent", null);
   }
 
-  public ResponseDto addCollaborator(AddCollaboratorDto data) {
-    // System.out.println("sksks");
+  public void addCollaborator(AddCollaboratorDto data) {
     Optional<ProjectModel> projectOtp = this.projectRepo.findById(data.projectId());
     if (projectOtp.isEmpty()) {
-      throw new ApiException(HttpStatus.NOT_FOUND, "project not found");
+      throw new ResourceNotFoundException("Project", data.projectId());
     }
     ProjectModel project = projectOtp.get();
 
     if (project.getCollaborators().contains(data.userId())) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "User is already a collaborator");
+      throw new BadRequestException("User is already a collaborator");
     }
 
     project.addCollaborator(data.userId());
     projectRepo.save(project);
-
-    return new ResponseDto(200, "User added as collaborator", null);
   }
 
-  public ResponseDto getCollaboratorDetails(String projectId) {
+  public List<UserPublicDto> getCollaboratorDetails(String projectId) {
     Optional<ProjectModel> projectOpt = projectRepo.findById(projectId);
 
     if (projectOpt.isEmpty()) {
-      throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
+      throw new ResourceNotFoundException("Project", projectId);
     }
 
     ProjectModel project = projectOpt.get();
@@ -144,23 +134,21 @@ public class ProjectService {
     List<UserModel> users = usersRepo.findAllByIdIn(collaboratorIds);
 
     // Convert to DTOs
-    List<UserPublicDto> collaborators = users.stream()
+    return users.stream()
         .map(user -> new UserPublicDto(user.getId(), user.getEmail()))
         .toList();
-
-    return new ResponseDto(200, "Collaborators fetched", collaborators);
   }
 
-  public ResponseDto removeCollaborator(String projectId, String userId) {
+  public List<UserPublicDto> removeCollaborator(String projectId, String userId) {
     Optional<ProjectModel> projectOtp = this.projectRepo.findById(projectId);
     if (projectOtp.isEmpty()) {
-      throw new ApiException(HttpStatus.NOT_FOUND, "Project not found");
+      throw new ResourceNotFoundException("Project", projectId);
     }
 
     ProjectModel project = projectOtp.get();
 
     if (!project.getCollaborators().contains(userId)) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "User is not a collaborator");
+      throw new BadRequestException("User is not a collaborator");
     }
 
     project.getCollaborators().remove(userId);
@@ -170,12 +158,8 @@ public class ProjectService {
     List<UserModel> users = usersRepo.findAllByIdIn(collaboratorIds);
 
     // Convert to DTOs
-    List<UserPublicDto> collaborators = users.stream()
+    return users.stream()
         .map(user -> new UserPublicDto(user.getId(), user.getEmail()))
         .toList();
-
-    return new ResponseDto(200, "Collaborator deleted", collaborators);
-
   }
-
 }

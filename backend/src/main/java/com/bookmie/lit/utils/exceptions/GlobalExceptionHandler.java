@@ -1,61 +1,99 @@
 package com.bookmie.lit.utils.exceptions;
 
+import com.bookmie.lit.utils.dtos.ApiError;
+import com.bookmie.lit.utils.dtos.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.bookmie.lit.utils.dtos.ErrorResponseDto;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(ApiException.class)
-  public ResponseEntity<ErrorResponseDto> handleApiException(ApiException ex) {
-    ErrorResponseDto errorResponse = new ErrorResponseDto(
-        ex.getStatus().value(),
-        ex.getMessage(),
-        ex.getDetails()
-    );
-    return new ResponseEntity<>(errorResponse, ex.getStatus());
-  }
+    // Handle your custom app exceptions
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAppException(
+            AppException ex,
+            HttpServletRequest request) {
 
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ErrorResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
-    Map<String, String> errors = new HashMap<>();
-    ex.getBindingResult().getAllErrors().forEach((error) -> {
-      String fieldName = ((FieldError) error).getField();
-      String errorMessage = error.getDefaultMessage();
-      errors.put(fieldName, errorMessage);
-    });
-    ErrorResponseDto errorResponse = new ErrorResponseDto(
-        HttpStatus.BAD_REQUEST.value(),
-        "Validation failed",
-        errors
-    );
-    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-  }
+        log.error("AppException: {}", ex.getMessage());
 
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
-    ErrorResponseDto errorResponse = new ErrorResponseDto(
-        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        ex.getMessage(),
-        getStackTraceAsString(ex)
-    );
-    return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-  }
+        ApiError error = ApiError.builder()
+                .status(ex.getStatus().value())
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
 
-  private String getStackTraceAsString(Exception ex) {
-    StringBuilder sb = new StringBuilder();
-    for (StackTraceElement element : ex.getStackTrace()) {
-      sb.append(element.toString()).append("\n");
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .message(ex.getMessage())
+                .error(error)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
-    return sb.toString();
-  }
+
+    // Handle @Valid / @Validated bean validation errors
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+
+        List<String> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .toList();
+
+        ApiError error = ApiError.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Validation failed")
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .errors(errors)
+                .build();
+
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .message("Validation failed")
+                .error(error)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // Catch-all — never let a raw 500 leak to the frontend
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGenericException(
+            Exception ex,
+            HttpServletRequest request) {
+
+        log.error("Unhandled exception at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+
+        ApiError error = ApiError.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message("An unexpected error occurred. Please try again later.")
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .message("An unexpected error occurred. Please try again later.")
+                .error(error)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.internalServerError().body(response);
+    }
 }
